@@ -20,7 +20,7 @@ import frontendImg from "../../public/slider1.jpg";
 import backendImg from "../../public/assets/project1.jpg";
 import fullstackImg from "../../public/slider1.jpg";
 import videoEditImg from "../../public/assets/project1.jpg";
-import musicEditImg from "../../public/assets/slider1.jpg";
+import musicEditImg from "../../public/slider1.jpg";
 import pptImg from "../../public/assets/project1.jpg";
 import wordImg from "../../public/slider1.jpg";
 import pdfImg from "../../public/assets/project1.jpg";
