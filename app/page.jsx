@@ -8,7 +8,7 @@ import Contact from "./components/Contact";
 import { useState } from "react";
 import { FiMessageSquare, FiX } from "react-icons/fi";
 import Head from "next/head";
-import aiAssistantIcon from "../public/assets/ERRTEKNALOZY.jpg"; // Renamed for clarity
+import aiAssistantIcon from "../public/ERRTEKNALOZY.jpg"; // Renamed for clarity
 import Image from "next/image";
 
 export default function Home() {

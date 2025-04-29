@@ -12,7 +12,7 @@ import {
   FiMenu,
 } from "react-icons/fi";
 import Image from "next/image";
-import logo from "../../public/assets/ERRTEKNALOZY.jpg"; // Adjust the path to your logo
+import logo from "../../public/ERRTEKNALOZY.jpg"; // Adjust the path to your logo
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);

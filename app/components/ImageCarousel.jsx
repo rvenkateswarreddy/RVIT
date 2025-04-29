@@ -7,10 +7,10 @@ import Image from "next/image";
 import "swiper/css";
 import "swiper/css/pagination";
 
-import slide1 from "../../public/assets/slider1.jpg";
-import slide2 from "../../public/assets/slider2.jpg";
-import slide3 from "../../public/assets/slider1.jpg";
-import slide4 from "../../public/assets/slider2.jpg";
+import slide1 from "../../public/slider1.jpg";
+import slide2 from "../../public/slider2.jpg";
+import slide3 from "../../public/slider1.jpg";
+import slide4 from "../../public/slider2.jpg";
 
 const carouselData = [
   {

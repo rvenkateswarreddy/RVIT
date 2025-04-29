@@ -1,5 +1,5 @@
 import Image from "next/image";
-import aboutImage from "../../public/assets/slider2.jpg"; // Replace with your image path
+import aboutImage from "../../public/slider2.jpg"; // Replace with your image path
 import Animation from "./Animation";
 
 export default function AboutSection() {

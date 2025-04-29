@@ -7,9 +7,9 @@ import AnimationTitles from "./AnimationTitles";
 import Animation from "./Animation";
 
 // Import your images
-import slide1 from "../../public/assets/slider1.jpg";
-import slide2 from "../../public/assets/slider2.jpg";
-import slide3 from "../../public/assets/slider1.jpg";
+import slide1 from "../../public/slider1.jpg";
+import slide2 from "../../public/slider2.jpg";
+import slide3 from "../../public/slider1.jpg";
 import slide4 from "../../public/assets/kesava.jpg";
 
 const Team = () => {

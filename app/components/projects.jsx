@@ -7,7 +7,7 @@ import { FiEye, FiGithub, FiExternalLink, FiSearch, FiX } from "react-icons/fi";
 import slide1 from "../../public/assets/project1.png";
 import slide2 from "../../public/assets/online_doctor.png";
 import slide3 from "../../public/assets/svu_payment.png";
-import slide4 from "../../public/assets/slider2.jpg";
+import slide4 from "../../public/slider2.jpg";
 import AnimationTitles from "./AnimationTitles";
 import Animation from "./Animation";
 
