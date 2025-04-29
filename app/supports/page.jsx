@@ -14,18 +14,18 @@ import Image from "next/image";
 
 // Sample images (replace with your actual imports)
 import pythonImg from "../../public/assets/project1.jpg";
-import javaImg from "../../public/assets/slider1.jpg";
+import javaImg from "../../public/slider1.jpg";
 import jsImg from "../../public/assets/project1.jpg";
-import frontendImg from "../../public/assets/slider1.jpg";
+import frontendImg from "../../public/slider1.jpg";
 import backendImg from "../../public/assets/project1.jpg";
-import fullstackImg from "../../public/assets/slider1.jpg";
+import fullstackImg from "../../public/slider1.jpg";
 import videoEditImg from "../../public/assets/project1.jpg";
 import musicEditImg from "../../public/assets/slider1.jpg";
 import pptImg from "../../public/assets/project1.jpg";
-import wordImg from "../../public/assets/slider1.jpg";
+import wordImg from "../../public/slider1.jpg";
 import pdfImg from "../../public/assets/project1.jpg";
 import jobAppImg from "../../public/assets/project1.jpg";
-import courseAppImg from "../../public/assets/slider1.jpg";
+import courseAppImg from "../../public/slider1.jpg";
 
 const SupportsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
