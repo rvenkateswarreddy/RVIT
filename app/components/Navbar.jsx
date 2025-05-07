@@ -13,6 +13,7 @@ import {
 } from "react-icons/fi";
 import Image from "next/image";
 import logo from "../../public/ERRTEKNALOZY.jpg"; // Adjust the path to your logo
+import { FaChalkboardTeacher, FaSuitcase } from "react-icons/fa";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,9 +38,9 @@ export default function Navbar() {
 
   const navLinks = [
     { id: "/", label: "Home", icon: <FiHome /> },
-    // { id: "/about", label: "About", icon: <FiUser /> },
     { id: "/supports", label: "Supports", icon: <FiSettings /> },
-    { id: "/projects", label: "Projects", icon: <FiBriefcase /> },
+    { id: "/trainings", label: "Trainings", icon: <FaChalkboardTeacher /> },
+    { id: "/jobs", label: "Jobs", icon: <FiBriefcase /> },
     { id: "/contactUs", label: "Contact", icon: <FiMail /> },
   ];
 

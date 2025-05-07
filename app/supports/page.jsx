@@ -1,189 +1,89 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import {
   FiSearch,
   FiCode,
   FiServer,
   FiLayers,
   FiFilm,
-  FiMusic,
   FiFileText,
   FiBriefcase,
 } from "react-icons/fi";
 import Image from "next/image";
+import Link from "next/link";
+import { db } from "../../FirebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
 
-// Sample images (replace with your actual imports)
-import pythonImg from "../../public/assets/project1.jpg";
-import javaImg from "../../public/slider1.jpg";
-import jsImg from "../../public/assets/project1.jpg";
-import frontendImg from "../../public/slider1.jpg";
-import backendImg from "../../public/assets/project1.jpg";
-import fullstackImg from "../../public/slider1.jpg";
-import videoEditImg from "../../public/assets/project1.jpg";
-import musicEditImg from "../../public/slider1.jpg";
-import pptImg from "../../public/assets/project1.jpg";
-import wordImg from "../../public/slider1.jpg";
-import pdfImg from "../../public/assets/project1.jpg";
-import jobAppImg from "../../public/assets/project1.jpg";
-import courseAppImg from "../../public/slider1.jpg";
+// Icon mapping for consistent usage
+const iconComponents = {
+  code: <FiCode className="text-blue-500" />,
+  server: <FiServer className="text-purple-500" />,
+  layers: <FiLayers className="text-green-500" />,
+  film: <FiFilm className="text-red-500" />,
+  fileText: <FiFileText className="text-yellow-500" />,
+  briefcase: <FiBriefcase className="text-indigo-500" />,
+};
 
 const SupportsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [supportDetails, setSupportDetails] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const supportCategories = [
     {
       id: "programming",
       name: "Programming Languages",
-      icon: <FiCode className="text-blue-500" />,
+      icon: "code",
     },
     {
       id: "frontend",
       name: "Frontend Development",
-      icon: <FiLayers className="text-green-500" />,
+      icon: "layers",
     },
     {
       id: "backend",
       name: "Backend Development",
-      icon: <FiServer className="text-purple-500" />,
+      icon: "server",
     },
     {
       id: "editing",
       name: "Editing Services",
-      icon: <FiFilm className="text-red-500" />,
+      icon: "film",
     },
     {
       id: "documents",
       name: "Document Creation",
-      icon: <FiFileText className="text-yellow-500" />,
+      icon: "fileText",
     },
     {
       id: "applications",
       name: "Application Support",
-      icon: <FiBriefcase className="text-indigo-500" />,
+      icon: "briefcase",
     },
   ];
 
-  const supportItems = [
-    {
-      id: 1,
-      title: "Python Support",
-      description:
-        "Expert assistance with Python programming, debugging, and optimization for all skill levels.",
-      category: "programming",
-      icon: <FiCode className="text-blue-500" />,
-      image: pythonImg,
-    },
-    {
-      id: 2,
-      title: "Java Support",
-      description:
-        "Comprehensive Java development help including Spring framework and enterprise applications.",
-      category: "programming",
-      icon: <FiCode className="text-blue-500" />,
-      image: javaImg,
-    },
-    {
-      id: 3,
-      title: "JavaScript Support",
-      description:
-        "From basic syntax to advanced frameworks like React and Node.js, we cover it all.",
-      category: "programming",
-      icon: <FiCode className="text-blue-500" />,
-      image: jsImg,
-    },
-    {
-      id: 4,
-      title: "Frontend Development",
-      description:
-        "HTML, CSS, JavaScript and framework support for building responsive user interfaces.",
-      category: "frontend",
-      icon: <FiLayers className="text-green-500" />,
-      image: frontendImg,
-    },
-    {
-      id: 5,
-      title: "Backend Development",
-      description:
-        "Server-side programming, APIs, databases, and architecture design assistance.",
-      category: "backend",
-      icon: <FiServer className="text-purple-500" />,
-      image: backendImg,
-    },
-    {
-      id: 6,
-      title: "Full Stack Support",
-      description:
-        "End-to-end development support covering both frontend and backend technologies.",
-      category: "backend",
-      icon: <FiLayers className="text-indigo-500" />,
-      image: fullstackImg,
-    },
-    {
-      id: 7,
-      title: "Video Editing",
-      description:
-        "Professional video editing support for all major software and formats.",
-      category: "editing",
-      icon: <FiFilm className="text-red-500" />,
-      image: videoEditImg,
-    },
-    {
-      id: 8,
-      title: "Music Editing",
-      description:
-        "Audio editing, mixing, mastering, and production assistance.",
-      category: "editing",
-      icon: <FiMusic className="text-pink-500" />,
-      image: musicEditImg,
-    },
-    {
-      id: 9,
-      title: "PPT Creation",
-      description:
-        "Help with designing professional PowerPoint presentations and slides.",
-      category: "documents",
-      icon: <FiFileText className="text-yellow-500" />,
-      image: pptImg,
-    },
-    {
-      id: 10,
-      title: "Word Documents",
-      description:
-        "Assistance with formatting, templates, and advanced Word features.",
-      category: "documents",
-      icon: <FiFileText className="text-yellow-500" />,
-      image: wordImg,
-    },
-    {
-      id: 11,
-      title: "PDF Services",
-      description: "Help with creating, editing, and optimizing PDF documents.",
-      category: "documents",
-      icon: <FiFileText className="text-yellow-500" />,
-      image: pdfImg,
-    },
-    {
-      id: 12,
-      title: "Job Applications",
-      description:
-        "Support with resume building, cover letters, and job application processes.",
-      category: "applications",
-      icon: <FiBriefcase className="text-indigo-500" />,
-      image: jobAppImg,
-    },
-    {
-      id: 13,
-      title: "Course Applications",
-      description:
-        "Assistance with ICET and other educational course applications.",
-      category: "applications",
-      icon: <FiBriefcase className="text-indigo-500" />,
-      image: courseAppImg,
-    },
-  ];
+  useEffect(() => {
+    const fetchSupportDetails = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "support"));
+        const supports = [];
+        querySnapshot.forEach((doc) => {
+          supports.push({ id: doc.id, ...doc.data() });
+        });
+        setSupportDetails(supports);
+      } catch (error) {
+        console.error("Error fetching support details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const filteredSupports = supportItems.filter((item) => {
+    fetchSupportDetails();
+  }, []);
+
+  const filteredSupports = supportDetails.filter((item) => {
     const matchesSearch =
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -193,6 +93,14 @@ const SupportsPage = () => {
 
     return matchesSearch && matchesCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-800 flex items-center justify-center">
+        <div className="text-white text-xl">Loading support services...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -248,13 +156,13 @@ const SupportsPage = () => {
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
-              <span className="mr-1">{category.icon}</span>
+              <span className="mr-1">{iconComponents[category.icon]}</span>
               {category.name}
             </button>
           ))}
         </div>
 
-        {/* Support Items Grid */}
+        {/* Conditional Rendering */}
         {filteredSupports.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredSupports.map((item) => (
@@ -263,13 +171,15 @@ const SupportsPage = () => {
                 className="bg-gray-700 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 hover:-translate-y-1 transform transition-transform duration-300"
               >
                 <div className="relative h-48 w-full">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
+                  {item.image && (
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                      unoptimized // Required for external image URLs
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                     <span className="text-white font-medium">
                       {
@@ -282,15 +192,33 @@ const SupportsPage = () => {
                 </div>
                 <div className="p-6">
                   <div className="flex items-center mb-3">
-                    <div className="mr-3 text-xl">{item.icon}</div>
+                    <div className="mr-3 text-xl">
+                      {iconComponents[item.icon]}
+                    </div>
                     <h3 className="text-xl font-bold text-gray-100">
                       {item.title}
                     </h3>
                   </div>
                   <p className="text-gray-200 mb-4">{item.description}</p>
-                  <button className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-300">
+                  <Link
+                    href={{
+                      pathname: `/supports/${item.id}`,
+                      query: {
+                        item: JSON.stringify({
+                          id: item.id,
+                          title: item.title,
+                          description: item.description,
+                          image: item.image,
+                          category: item.category,
+                          icon: item.icon,
+                          details: item.details,
+                        }),
+                      },
+                    }}
+                    className="inline-block px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors text-center w-full"
+                  >
                     Get Support
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}
@@ -301,38 +229,12 @@ const SupportsPage = () => {
               No support services found
             </h3>
             <p className="text-gray-500">
-              Try adjusting your search or filter criteria
+              {supportDetails.length === 0
+                ? "No support services available yet"
+                : "Try adjusting your search or filter criteria"}
             </p>
           </div>
         )}
-
-        {/* CTA Section */}
-        <div className="mt-16 text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">
-            Need specialized support not listed here?
-          </h3>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-            Our team can provide customized solutions for your unique
-            requirements.
-          </p>
-          <button className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl">
-            Contact Our Support Team
-            <svg
-              className="w-4 h-4 ml-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-              />
-            </svg>
-          </button>
-        </div>
       </div>
     </div>
   );
