@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
+import dynamic from "next/dynamic";
 import {
   FiSearch,
   FiCode,
@@ -10,10 +11,14 @@ import {
   FiFileText,
   FiBriefcase,
 } from "react-icons/fi";
-import Image from "next/image";
-import Link from "next/link";
 import { db } from "../../FirebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
+import useIntersectionObserver from "../components/useIntersectionObserver";
+
+// Dynamically import the SupportCard component for lazy loading
+const SupportCard = dynamic(() => import("../components/SupportCard"), {
+  suspense: true,
+});
 
 // Icon mapping for consistent usage
 const iconComponents = {
@@ -30,43 +35,56 @@ const SupportsPage = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [supportDetails, setSupportDetails] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const supportCategories = [
-    {
-      id: "programming",
-      name: "Programming Languages",
-      icon: "code",
-    },
-    {
-      id: "frontend",
-      name: "Frontend Development",
-      icon: "layers",
-    },
-    {
-      id: "backend",
-      name: "Backend Development",
-      icon: "server",
-    },
-    {
-      id: "editing",
-      name: "Editing Services",
-      icon: "film",
-    },
-    {
-      id: "documents",
-      name: "Document Creation",
-      icon: "fileText",
-    },
-    {
-      id: "applications",
-      name: "Application Support",
-      icon: "briefcase",
-    },
-  ];
+  const itemsPerPage = 10; // Number of items per page
+
+  const supportCategories = useMemo(
+    () => [
+      { id: "programming", name: "Programming Languages", icon: "code" },
+      { id: "web", name: "Web Development", icon: "layers" },
+      { id: "mobile", name: "Mobile App Development", icon: "briefcase" },
+      { id: "database", name: "Database Support", icon: "server" },
+      { id: "devops", name: "DevOps & Infrastructure", icon: "server" },
+      { id: "security", name: "Security Support", icon: "briefcase" },
+      { id: "erp", name: "ERP & Enterprise Applications", icon: "fileText" },
+      { id: "crm", name: "CRM & SaaS Support", icon: "fileText" },
+      { id: "testing", name: "Testing & QA Support", icon: "layers" },
+      { id: "aiml", name: "AI/ML & Data Science Support", icon: "code" },
+      { id: "api", name: "API & Integration Support", icon: "server" },
+      { id: "networking", name: "Networking & System Support", icon: "server" },
+      { id: "desktop", name: "Desktop & Software Support", icon: "briefcase" },
+      { id: "cms", name: "Content Management Systems", icon: "fileText" },
+      { id: "lms", name: "Learning Management Systems", icon: "fileText" },
+      {
+        id: "digital-marketing",
+        name: "Digital Marketing & SEO",
+        icon: "briefcase",
+      },
+      {
+        id: "data-analytics",
+        name: "Data Analytics & Reporting",
+        icon: "layers",
+      },
+      {
+        id: "version-control",
+        name: "Version Control & Code Management",
+        icon: "code",
+      },
+      {
+        id: "client-training",
+        name: "Client Training & Onboarding",
+        icon: "briefcase",
+      },
+    ],
+    []
+  );
 
   useEffect(() => {
     const fetchSupportDetails = async () => {
       try {
+        setLoading(true);
         const querySnapshot = await getDocs(collection(db, "support"));
         const supports = [];
         querySnapshot.forEach((doc) => {
@@ -83,21 +101,48 @@ const SupportsPage = () => {
     fetchSupportDetails();
   }, []);
 
-  const filteredSupports = supportDetails.filter((item) => {
-    const matchesSearch =
+  const loadMoreData = () => {
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+
+    if (endIndex >= supportDetails.length) {
+      setHasMore(false);
+    }
+
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  const filteredSupports = useMemo(() => {
+    const matchesSearch = (item) =>
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory =
+    const matchesCategory = (item) =>
       activeCategory === "All" || item.category === activeCategory;
 
-    return matchesSearch && matchesCategory;
+    return supportDetails
+      .filter((item) => matchesSearch(item) && matchesCategory(item))
+      .slice(0, page * itemsPerPage);
+  }, [supportDetails, searchTerm, activeCategory, page]);
+
+  const { ref } = useIntersectionObserver({
+    onIntersect: loadMoreData,
+    enabled: hasMore,
   });
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-800 flex items-center justify-center">
-        <div className="text-white text-xl">Loading support services...</div>
+      <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+          <p className="text-xl text-gray-100 font-medium">
+            Loading RV Support Services...
+          </p>
+        </div>
+        <p className="text-gray-400 mt-4 text-center">
+          Bringing you the best support services tailored for your needs. Please
+          wait a moment.
+        </p>
       </div>
     );
   }
@@ -162,79 +207,23 @@ const SupportsPage = () => {
           ))}
         </div>
 
-        {/* Conditional Rendering */}
-        {filteredSupports.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredSupports.map((item) => (
-              <div
-                key={item.id}
-                className="bg-gray-700 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 hover:-translate-y-1 transform transition-transform duration-300"
-              >
-                <div className="relative h-48 w-full">
-                  {item.image && (
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      fill
-                      className="object-cover"
-                      unoptimized // Required for external image URLs
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                    <span className="text-white font-medium">
-                      {
-                        supportCategories.find(
-                          (cat) => cat.id === item.category
-                        )?.name
-                      }
-                    </span>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center mb-3">
-                    <div className="mr-3 text-xl">
-                      {iconComponents[item.icon]}
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-100">
-                      {item.title}
-                    </h3>
-                  </div>
-                  <p className="text-gray-200 mb-4">{item.description}</p>
-                  <Link
-                    href={{
-                      pathname: `/supports/${item.id}`,
-                      query: {
-                        item: JSON.stringify({
-                          id: item.id,
-                          title: item.title,
-                          description: item.description,
-                          image: item.image,
-                          category: item.category,
-                          icon: item.icon,
-                          details: item.details,
-                        }),
-                      },
-                    }}
-                    className="inline-block px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors text-center w-full"
-                  >
-                    Get Support
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <h3 className="text-2xl font-medium text-gray-100 mb-2">
-              No support services found
-            </h3>
-            <p className="text-gray-500">
-              {supportDetails.length === 0
-                ? "No support services available yet"
-                : "Try adjusting your search or filter criteria"}
-            </p>
-          </div>
-        )}
+        {/* Support Cards */}
+        <Suspense fallback={<div>Loading...</div>}>
+          {filteredSupports.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredSupports.map((item) => (
+                <SupportCard key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-gray-400 mt-8">
+              No support services available for the selected category.
+            </div>
+          )}
+        </Suspense>
+
+        {/* Observer for Infinite Scrolling */}
+        {hasMore && <div ref={ref} className="h-16"></div>}
       </div>
     </div>
   );

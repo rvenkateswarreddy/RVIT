@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   FiSearch,
   FiBriefcase,
@@ -7,145 +7,31 @@ import {
   FiDollarSign,
   FiClock,
   FiX,
-  FiAward,
 } from "react-icons/fi";
 import { FaReact, FaNodeJs, FaPython, FaJava } from "react-icons/fa";
 import { SiJavascript, SiTypescript, SiNextdotjs } from "react-icons/si";
 import Link from "next/link";
-
-const jobsData = [
-  {
-    id: 1,
-    title: "Senior React Developer",
-    company: "TechCorp Inc.",
-    location: "San Francisco, CA (Remote)",
-    salary: "$120,000 - $150,000",
-    type: "Full-time",
-    posted: "2 days ago",
-    description:
-      "We're looking for an experienced React developer to lead our frontend team and architect our next-generation web applications.",
-    requirements: [
-      "5+ years of React experience",
-      "Expertise with Redux/Toolkit",
-      "Strong TypeScript skills",
-      "Experience with Next.js",
-      "CI/CD pipeline knowledge",
-    ],
-    skills: ["React", "TypeScript", "Next.js", "Redux", "Jest"],
-    category: "Frontend",
-  },
-  {
-    id: 2,
-    title: "Node.js Backend Engineer",
-    company: "DataSystems LLC",
-    location: "New York, NY (Hybrid)",
-    salary: "$110,000 - $140,000",
-    type: "Full-time",
-    posted: "1 week ago",
-    description:
-      "Join our backend team to build scalable microservices and APIs for our enterprise data platform.",
-    requirements: [
-      "4+ years Node.js experience",
-      "Proficient with Express/NestJS",
-      "MongoDB/PostgreSQL expertise",
-      "AWS/GCP deployment experience",
-      "Docker/Kubernetes knowledge",
-    ],
-    skills: ["Node.js", "Express", "MongoDB", "Docker", "AWS"],
-    category: "Backend",
-  },
-  {
-    id: 3,
-    title: "Full Stack Developer",
-    company: "InnovateStart",
-    location: "Remote",
-    salary: "$90,000 - $120,000",
-    type: "Full-time",
-    posted: "3 days ago",
-    description:
-      "Seeking a versatile full-stack developer to work on our SaaS product end-to-end.",
-    requirements: [
-      "3+ years full-stack experience",
-      "React + Node.js proficiency",
-      "GraphQL/REST API design",
-      "Database design skills",
-      "Testing experience",
-    ],
-    skills: ["React", "Node.js", "GraphQL", "PostgreSQL", "Jest"],
-    category: "Fullstack",
-  },
-  {
-    id: 4,
-    title: "Python Data Engineer",
-    company: "AnalyticsPro",
-    location: "Boston, MA",
-    salary: "$130,000 - $160,000",
-    type: "Full-time",
-    posted: "5 days ago",
-    description:
-      "Build and optimize our data pipelines and ETL processes for large-scale analytics.",
-    requirements: [
-      "5+ years Python experience",
-      "Pandas/NumPy expertise",
-      "Airflow/Luigi experience",
-      "Big data technologies",
-      "SQL optimization",
-    ],
-    skills: ["Python", "Pandas", "Airflow", "Spark", "SQL"],
-    category: "Data",
-  },
-  {
-    id: 5,
-    title: "Junior Frontend Developer",
-    company: "DigitalSolutions",
-    location: "Chicago, IL",
-    salary: "$70,000 - $85,000",
-    type: "Full-time",
-    posted: "1 day ago",
-    description:
-      "Great opportunity for a junior developer to grow their skills in a supportive team environment.",
-    requirements: [
-      "1+ years frontend experience",
-      "React fundamentals",
-      "CSS/HTML proficiency",
-      "Willingness to learn",
-      "Team collaboration skills",
-    ],
-    skills: ["React", "JavaScript", "CSS", "HTML", "Git"],
-    category: "Frontend",
-  },
-  {
-    id: 6,
-    title: "DevOps Engineer",
-    company: "CloudScale",
-    location: "Remote",
-    salary: "$140,000 - $170,000",
-    type: "Contract",
-    posted: "2 weeks ago",
-    description:
-      "Help us build and maintain our cloud infrastructure and deployment pipelines.",
-    requirements: [
-      "AWS/GCP certification",
-      "Terraform/Ansible experience",
-      "CI/CD pipeline expertise",
-      "Monitoring/logging tools",
-      "Security best practices",
-    ],
-    skills: ["AWS", "Terraform", "Kubernetes", "Docker", "CI/CD"],
-    category: "DevOps",
-  },
-];
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  limit,
+  startAfter,
+} from "firebase/firestore";
+import { db } from "../../FirebaseConfig";
 
 const categories = [
   "All",
-  "Frontend",
-  "Backend",
-  "Fullstack",
-  "Data",
-  "DevOps",
+  "Full Stack Development",
+  "Frontend Development",
+  "Backend Development",
+  "Web Development",
 ];
 const jobTypes = ["All", "Full-time", "Contract", "Part-time"];
 const experienceLevels = ["All", "Junior", "Mid-level", "Senior"];
+
+const PAGE_SIZE = 10;
 
 const SkillIcon = ({ skill }) => {
   switch (skill) {
@@ -173,6 +59,45 @@ export default function JobsPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedJobType, setSelectedJobType] = useState("All");
   const [selectedExperience, setSelectedExperience] = useState("All");
+  const [jobsData, setJobsData] = useState([]);
+  const [lastVisible, setLastVisible] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchJobs = useCallback(async () => {
+    if (!hasMore || loading) return;
+
+    setLoading(true);
+    try {
+      const jobsQuery = query(
+        collection(db, "rvit_jobs"),
+        limit(PAGE_SIZE),
+        ...(lastVisible ? [startAfter(lastVisible)] : [])
+      );
+
+      const querySnapshot = await getDocs(jobsQuery);
+      const newJobs = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setJobsData((prevJobs) => {
+        const jobIds = new Set(prevJobs.map((job) => job.id));
+        const uniqueJobs = newJobs.filter((job) => !jobIds.has(job.id));
+        return [...prevJobs, ...uniqueJobs];
+      });
+      setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+      setHasMore(newJobs.length === PAGE_SIZE);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [lastVisible, hasMore, loading]);
+
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
 
   const filteredJobs = jobsData.filter((job) => {
     const matchesSearch =
@@ -192,17 +117,40 @@ export default function JobsPage() {
     const matchesExperience =
       selectedExperience === "All" ||
       (selectedExperience === "Junior" &&
-        job.title.toLowerCase().includes("junior")) ||
+        job.experience.toLowerCase().includes("junior")) ||
       (selectedExperience === "Mid-level" &&
-        !job.title.toLowerCase().includes("junior") &&
-        !job.title.toLowerCase().includes("senior")) ||
+        job.experience.toLowerCase().includes("mid-level")) ||
       (selectedExperience === "Senior" &&
-        job.title.toLowerCase().includes("senior"));
+        job.experience.toLowerCase().includes("senior"));
 
     return (
       matchesSearch && matchesCategory && matchesJobType && matchesExperience
     );
   });
+
+  const handleScroll = () => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 100 &&
+      !loading &&
+      hasMore
+    ) {
+      fetchJobs();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loading, hasMore]);
+
+  if (loading && jobsData.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100 flex items-center justify-center">
+        <p>Loading jobs...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
@@ -246,12 +194,9 @@ export default function JobsPage() {
             )}
           </div>
 
+          {/* Filters */}
           <div className="flex flex-wrap justify-center gap-4 mb-8">
-            {/* Category Filter */}
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiBriefcase className="h-5 w-5 text-gray-400" />
-              </div>
               <select
                 className="pl-10 pr-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-100 appearance-none"
                 value={selectedCategory}
@@ -269,11 +214,7 @@ export default function JobsPage() {
               </select>
             </div>
 
-            {/* Job Type Filter */}
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiClock className="h-5 w-5 text-gray-400" />
-              </div>
               <select
                 className="pl-10 pr-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-100"
                 value={selectedJobType}
@@ -287,11 +228,7 @@ export default function JobsPage() {
               </select>
             </div>
 
-            {/* Experience Level Filter */}
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiAward className="h-5 w-5 text-gray-400" />
-              </div>
               <select
                 className="pl-10 pr-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-100"
                 value={selectedExperience}
@@ -305,7 +242,6 @@ export default function JobsPage() {
               </select>
             </div>
 
-            {/* Reset Filters */}
             <button
               onClick={() => {
                 setSearchTerm("");
@@ -402,7 +338,9 @@ export default function JobsPage() {
                         </div>
                         <div className="flex items-center text-gray-400">
                           <FiClock className="mr-1" />
-                          <span>{job.posted}</span>
+                          <span>
+                            {new Date(job.posted).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
                       <Link
@@ -442,6 +380,11 @@ export default function JobsPage() {
             >
               Reset filters
             </button>
+          </div>
+        )}
+        {loading && hasMore && (
+          <div className="text-center py-4">
+            <p>Loading more jobs...</p>
           </div>
         )}
       </div>

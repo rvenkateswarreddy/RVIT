@@ -1,132 +1,88 @@
 "use client";
 
-import React from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay } from "swiper/modules";
-import Image from "next/image";
-import "swiper/css";
-import "swiper/css/pagination";
+import React, { useRef, Suspense } from "react";
+import { Canvas } from "@react-three/fiber";
+import { Preload } from "@react-three/drei";
+import TechWorldBackground from "./TechWorldBackground"; // Separate the background into its own file for modularity
 
-import slide1 from "../../public/slider1.jpg";
-import slide2 from "../../public/slider2.jpg";
-import slide3 from "../../public/slider1.jpg";
-import slide4 from "../../public/slider2.jpg";
+const ImageCarousel = () => {
+  const heroRef = useRef(null);
 
-const carouselData = [
-  {
-    id: 1,
-    image: slide1,
-    alt: "Modern office workspace",
-    title: "Premium Workspace Solutions",
-    description: "Creating productive environments for your team",
-  },
-  {
-    id: 2,
-    image: slide2,
-    alt: "Team collaboration meeting",
-    title: "Collaborative Spaces",
-    description: "Designed to foster creativity and teamwork",
-  },
-  {
-    id: 3,
-    image: slide3,
-    alt: "Technology infrastructure",
-    title: "Cutting-Edge Technology",
-    description: "Future-proof solutions for your business",
-  },
-  {
-    id: 4,
-    image: slide4,
-    alt: "Customer support team",
-    title: "Dedicated Support",
-    description: "24/7 assistance for your business needs",
-  },
-];
+  const services = [
+    { name: "Global Recruitment", icon: "👥" },
+    { name: "IT Staffing", icon: "💻" },
+    { name: "Project Support", icon: "🛠️" },
+    { name: "Technical Training", icon: "🎓" },
+    { name: "Contract Delivery", icon: "📝" },
+    { name: "Remote Solutions", icon: "🌐" },
+  ];
 
-export default function ImageCarousel() {
   return (
-    <div className="relative w-full h-[80vh] max-h-[800px]">
-      <Swiper
-        modules={[Pagination, Autoplay]}
-        pagination={{
-          clickable: true,
-          dynamicBullets: true,
-          bulletClass: "swiper-custom-bullet",
-          bulletActiveClass: "swiper-custom-bullet-active",
-        }}
-        autoplay={{
-          delay: 5000,
-          disableOnInteraction: false,
-        }}
-        loop={true}
-        grabCursor={true}
-        breakpoints={{
-          320: { slidesPerView: 1, spaceBetween: 0 },
-          768: { slidesPerView: 1, spaceBetween: 0 },
-          1024: { slidesPerView: 1, spaceBetween: 0 },
-        }}
-        className="h-full w-full"
-      >
-        {carouselData.map((slide) => (
-          <SwiperSlide key={slide.id} className="relative">
-            <div className="absolute inset-0 bg-black/30 z-10" />
-            <Image
-              src={slide.image}
-              alt={slide.alt}
-              fill
-              className="object-cover"
-              quality={90}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
-              // REMOVE placeholder and priority for all
-              loading="eager" // force immediate loading without lazy
-            />
-            <div className="absolute inset-0 flex flex-col justify-center items-center text-center z-20 px-4 sm:px-8">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 animate-fadeIn">
-                {slide.title}
-              </h2>
-              <p className="text-lg sm:text-xl md:text-2xl text-white max-w-2xl animate-fadeIn delay-100">
-                {slide.description}
-              </p>
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
+    <section
+      ref={heroRef}
+      className="relative h-screen w-full overflow-hidden bg-gradient-to-b from-gray-900 to-gray-950 flex items-center justify-center pt-52 sm:pt-1"
+    >
+      {/* Three.js Background */}
+      <div className="absolute inset-0 z-0 opacity-40">
+        <Canvas camera={{ position: [0, 0, 1] }}>
+          <Suspense fallback={<div className="text-white">Loading...</div>}>
+            <TechWorldBackground />
+          </Suspense>
+          <Preload all />
+        </Canvas>
+      </div>
 
-      {/* Custom styles */}
-      <style jsx global>{`
-        .swiper-custom-bullet {
-          width: 10px;
-          height: 10px;
-          background: rgba(255, 255, 255, 0.5);
-          opacity: 1;
-          margin: 0 6px !important;
-          transition: all 0.3s ease;
-        }
-        .swiper-custom-bullet-active {
-          background: #fff;
-          width: 30px;
-          border-radius: 5px;
-        }
-        .swiper-pagination {
-          bottom: 30px !important;
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.8s ease-out forwards;
-        }
-        .delay-100 {
-          animation-delay: 0.3s;
-        }
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
-    </div>
+      {/* Grid Pattern */}
+      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-repeat opacity-10" />
+
+      {/* Content */}
+      <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-24 xl:px-32 flex flex-col items-center text-center">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+              RV IT Consulting
+            </span>{" "}
+            <br />
+            Transforming Tech Talent Globally
+          </h1>
+
+          <p className="text-lg md:text-xl lg:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto">
+            End-to-end IT solutions with global recruitment, staffing, project
+            delivery, and technical training for the modern tech landscape.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20">
+              Get Started
+            </button>
+            <button className="px-8 py-3 bg-transparent border-2 border-cyan-400 text-cyan-100 font-medium rounded-lg hover:bg-cyan-400/10 transition-colors">
+              Learn More
+            </button>
+          </div>
+        </div>
+
+        {/* Services Grid */}
+        <div className="mt-16 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 w-full max-w-5xl">
+          {services.map((service, index) => (
+            <div
+              key={index}
+              className="bg-gray-800/30 backdrop-blur-sm border border-gray-700 rounded-lg p-4 hover:bg-gray-700/50 transition-colors cursor-default"
+            >
+              <div className="text-2xl mb-2">{service.icon}</div>
+              <div className="text-sm font-medium text-gray-200">
+                {service.name}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Scrolling indicator */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
+        <div className="animate-bounce w-6 h-6 border-4 border-cyan-400 rounded-full border-t-transparent"></div>
+      </div>
+    </section>
   );
-}
+};
+
+export default ImageCarousel;

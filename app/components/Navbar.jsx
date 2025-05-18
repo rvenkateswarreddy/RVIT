@@ -1,40 +1,63 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation"; // Updated to use usePathname
 import {
   FiHome,
-  FiUser,
   FiSettings,
   FiBriefcase,
   FiMail,
-  FiX,
   FiMenu,
+  FiX,
 } from "react-icons/fi";
+import { FaChalkboardTeacher } from "react-icons/fa";
 import Image from "next/image";
-import logo from "../../public/ERRTEKNALOZY.jpg"; // Adjust the path to your logo
-import { FaChalkboardTeacher, FaSuitcase } from "react-icons/fa";
+import Link from "next/link";
+import { auth } from "../../FirebaseConfig";
+import { signOut } from "firebase/auth";
+import LoginModal from "./LoginModal";
+import CookiesBanner from "./CookiesBanner";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const pathname = usePathname();
-  const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  const [isNavigating, setIsNavigating] = useState(false); // State for navigation loading
+  const pathname = usePathname(); // Get the current pathname
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // Trigger navigation loading when pathname changes
+    setIsNavigating(true);
+
+    const timer = setTimeout(() => {
+      setIsNavigating(false); // Simulate loading complete
+    }, 300); // Adjust timing as needed
+
+    return () => clearTimeout(timer);
+  }, [pathname]); // Dependency is pathname
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+    setUser(null);
+  };
 
   const navLinks = [
     { id: "/", label: "Home", icon: <FiHome /> },
@@ -44,157 +67,144 @@ export default function Navbar() {
     { id: "/contactUs", label: "Contact", icon: <FiMail /> },
   ];
 
-  const handleLinkClick = (id) => {
-    setIsOpen(false);
-    router.push(id);
-  };
-
-  const mobileMenuVariants = {
-    hidden: { x: "-100%", opacity: 0 },
-    visible: {
-      x: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 20,
-      },
-    },
-    exit: {
-      x: "-100%",
-      opacity: 0,
-      transition: {
-        ease: "easeInOut",
-        duration: 0.3,
-      },
-    },
-  };
-
-  const linkVariants = {
-    hover: {
-      scale: 1.05,
-      transition: { duration: 0.2 },
-    },
-    tap: { scale: 0.95 },
-  };
-
   return (
-    <nav
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-gray-900 shadow-lg py-2" : "bg-gray-800 py-4"
-      }`}
-    >
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 ">
-        <div className="flex justify-between items-center">
-          {/* Brand Logo */}
-          <motion.div
-            className="flex items-center"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <a
-              href="/"
-              className="flex items-center"
-              onClick={(e) => {
-                e.preventDefault();
-                handleLinkClick("/");
-              }}
-            >
-              <Image
-                src={logo}
-                alt="ERRTEKNALOZY Logo"
-                width={150} // Adjust based on your logo dimensions
-                height={50} // Adjust based on your logo dimensions
-                className="h-12 w-auto rounded-3xl" // This will maintain aspect ratio
-                priority
-              />
-            </a>
-          </motion.div>
+    <>
+      {/* Loading Indicator */}
+      {isNavigating && (
+        <div className="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500 z-50 animate-loading" />
+      )}
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <ul className="flex space-x-10">
-              {navLinks.map((link) => (
-                <motion.li
-                  key={link.id}
-                  variants={linkVariants}
-                  whileHover="hover"
-                  whileTap="tap"
+      <header
+        className={`fixed top-0 inset-x-0 z-50 h-16 md:h-20 transition-all duration-300  ${
+          scrolled ? "bg-black shadow-md" : "bg-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-full">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <Image
+              src="/assets/rvitlogo.png"
+              alt="ERRTEKNALOZY Logo"
+              width={160}
+              height={60}
+              className="object-contain"
+              priority
+            />
+          </Link>
+
+          {/* Desktop Menu */}
+          <nav className="hidden md:flex items-center space-x-8">
+            {navLinks.map((link) => (
+              <Link
+                key={link.id}
+                href={link.id}
+                className={`flex items-center px-3 py-2 text-base font-medium transition-all rounded-md ${
+                  pathname === link.id
+                    ? "text-white bg-gray-800"
+                    : "text-gray-300 hover:text-white hover:bg-gray-800"
+                }`}
+              >
+                <span className="mr-2">{link.icon}</span>
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* User or Login */}
+          <div className="hidden md:flex items-center space-x-4">
+            {!loading && user ? (
+              <>
+                <span className="text-gray-300 text-sm">
+                  {user.displayName}
+                </span>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
                 >
-                  <a
-                    href={link.id}
-                    className={`flex items-center px-3 py-2 text-xl font-medium rounded-md transition-all duration-200 ${
-                      pathname === link.id
-                        ? "text-white bg-gray-700"
-                        : "text-gray-300 hover:text-white hover:bg-gray-700/50"
-                    }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleLinkClick(link.id);
-                    }}
-                  >
-                    <span className="mr-2">{link.icon}</span>
-                    {link.label}
-                  </a>
-                </motion.li>
-              ))}
-            </ul>
+                  Logout
+                </button>
+              </>
+            ) : (
+              !loading && (
+                <button
+                  onClick={() => setIsLoginModalOpen(true)}
+                  className="text-sm bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                >
+                  Login
+                </button>
+              )
+            )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <motion.button
-              onClick={toggleMenu}
-              className="p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-            </motion.button>
-          </div>
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden p-2 text-gray-300 hover:text-white focus:outline-none z-50"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          </button>
         </div>
-      </div>
 
-      {/* Mobile Navigation */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            className="md:hidden fixed inset-0 bg-gray-900/90 backdrop-blur-sm z-40 pt-20 mt-18"
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={mobileMenuVariants}
-          >
-            <ul className="flex flex-col space-y-4 px-6 py-4">
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.nav
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.25 }}
+              className="md:hidden fixed inset-0 bg-black z-40 flex flex-col px-6 pt-20 space-y-4 shadow-lg"
+            >
               {navLinks.map((link) => (
-                <motion.li
+                <Link
                   key={link.id}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.3 }}
+                  href={link.id}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center px-4 py-3 text-base font-medium rounded-md ${
+                    pathname === link.id
+                      ? "text-white bg-gray-700"
+                      : "text-gray-300 hover:bg-gray-700"
+                  }`}
                 >
-                  <a
-                    href={link.id}
-                    className={`flex items-center px-4 py-3 text-lg font-medium rounded-md transition-all duration-200 ${
-                      pathname === link.id
-                        ? "text-white bg-gray-700"
-                        : "text-gray-300 hover:text-white hover:bg-gray-700/50"
-                    }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleLinkClick(link.id);
-                    }}
-                  >
-                    <span className="mr-3">{link.icon}</span>
-                    {link.label}
-                  </a>
-                </motion.li>
+                  <span className="mr-3">{link.icon}</span>
+                  {link.label}
+                </Link>
               ))}
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+              {!loading && user ? (
+                <div className="flex items-center justify-between px-4 mt-4">
+                  <span className="text-gray-300">{user.displayName}</span>
+                  <button
+                    onClick={handleSignOut}
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                !loading && (
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      setIsLoginModalOpen(true);
+                    }}
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  >
+                    Login
+                  </button>
+                )
+              )}
+            </motion.nav>
+          )}
+        </AnimatePresence>
+      </header>
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
+
+      <CookiesBanner />
+    </>
   );
 }

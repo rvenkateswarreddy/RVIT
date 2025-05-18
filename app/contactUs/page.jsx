@@ -52,33 +52,6 @@ const ContactPage = () => {
                     <p className="text-gray-200">contact@tirupati.com</p>
                   </div>
                 </div>
-
-                <div className="flex items-start">
-                  <div className="bg-blue-500/10 p-3 rounded-lg mr-4">
-                    <FiPhone className="text-blue-400 text-xl" />
-                  </div>
-                  <div>
-                    <h3 className="text-gray-400 text-sm font-medium">Phone</h3>
-                    <p className="text-gray-200">+91 98765 43210</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="bg-blue-500/10 p-3 rounded-lg mr-4">
-                    <FiMapPin className="text-blue-400 text-xl" />
-                  </div>
-                  <div>
-                    <h3 className="text-gray-400 text-sm font-medium">
-                      Address
-                    </h3>
-                    <p className="text-gray-200">
-                      Tirupati, Andhra Pradesh - 517501
-                    </p>
-                    <p className="text-gray-400 text-sm mt-1">
-                      Near Tirumala Temple
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -162,27 +135,6 @@ const ContactPage = () => {
         </div>
 
         {/* Map Section */}
-        <div className="bg-gray-800 rounded-xl overflow-hidden shadow-2xl">
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-gray-100 mb-4">
-              Our Location in Tirupati
-            </h2>
-            <p className="text-gray-300 mb-6">
-              Visit us at our office near the sacred Tirumala Temple
-            </p>
-          </div>
-          <div className="h-96 w-full relative">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3882.036144724644!2d79.4197853158223!3d13.62853399038461!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a4d4b1b3e1d41a5%3A0x7db200a1a8e9a9a!2sTirumala%20Tirupati%20Balaji%20Temple!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen=""
-              loading="lazy"
-              className="absolute inset-0"
-            ></iframe>
-          </div>
-        </div>
       </div>
     </div>
   );

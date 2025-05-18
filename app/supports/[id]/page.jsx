@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   FiArrowLeft,
@@ -12,11 +13,19 @@ import {
   FiCloud,
   FiCheckCircle,
 } from "react-icons/fi";
-import Image from "next/image";
+
+// Firebase imports
+import { collection, addDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage, db } from "../../../FirebaseConfig";
+
+// Dynamically import Image for optimized loading
+const Image = dynamic(() => import("next/image"), { suspense: true });
 
 export default function SupportDetailsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [uploading, setUploading] = useState(false);
 
   // Get support item data from query parameters
   const getSupportItem = () => {
@@ -55,36 +64,73 @@ export default function SupportDetailsPage() {
     );
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Form submission logic would go here
-    alert("Support request submitted successfully!");
-    router.push("/supports");
-  };
+  const featureIcons = useMemo(
+    () => ({
+      "Spring Boot and Microservices support": (
+        <FiCloud className="text-blue-500 mr-2" />
+      ),
+      "JavaFX and Desktop development": (
+        <FiCpu className="text-blue-500 mr-2" />
+      ),
+      "Database integration (JPA, Hibernate)": (
+        <FiDatabase className="text-blue-500 mr-2" />
+      ),
+      "Performance optimization": (
+        <FiCheckCircle className="text-blue-500 mr-2" />
+      ),
+      "Deployment & CI/CD support": <FiCode className="text-blue-500 mr-2" />,
+    }),
+    []
+  );
 
-  // Icon mapping for features
-  const featureIcons = {
-    "Spring Boot and Microservices support": (
-      <FiCloud className="text-blue-500 mr-2" />
-    ),
-    "JavaFX and Desktop development": <FiCpu className="text-blue-500 mr-2" />,
-    "Database integration (JPA, Hibernate)": (
-      <FiDatabase className="text-blue-500 mr-2" />
-    ),
-    "Performance optimization": (
-      <FiCheckCircle className="text-blue-500 mr-2" />
-    ),
-    "Deployment & CI/CD support": <FiCode className="text-blue-500 mr-2" />,
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setUploading(true); // Show uploading state
+    const formData = new FormData(e.target);
+
+    const requestData = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      phone: formData.get("phone"), // Add phone number to requestData
+      message: formData.get("message"),
+      location: formData.get("location"),
+      item: item.title,
+    };
+
+    const resumeFile = formData.get("resume");
+
+    try {
+      // Upload resume to Firebase Storage
+      const storageRef = ref(storage, `resumes/${resumeFile.name}`);
+      await uploadBytes(storageRef, resumeFile);
+
+      // Get the download URL
+      const fileURL = await getDownloadURL(storageRef);
+
+      // Add the file URL to the request data
+      requestData.resume = fileURL;
+
+      // Store request in Firestore
+      await addDoc(collection(db, "supportRequests"), requestData);
+
+      alert("Support request submitted successfully!");
+      router.push("/supports");
+    } catch (error) {
+      console.error("Error submitting support request:", error);
+      alert("Failed to submit the support request. Please try again.");
+    } finally {
+      setUploading(false); // Hide uploading state
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       {/* Header */}
-      <header className="bg-gray-900 border-b border-gray-800">
-        <div className="max-w-9xl sm:px-6  py-6">
+      <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
+        <div className="max-w-9xl mx-auto px-4 py-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center text-blue-400 hover:text-blue-300 mb-6 transition-colors"
+            className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
           >
             <FiArrowLeft className="mr-2" />
             Back to Supports
@@ -93,83 +139,46 @@ export default function SupportDetailsPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 ">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Support Details */}
-          <div className="lg:col-span-2 space-y-6 lg:px-13">
-            {/* Image and basic info */}
-            <div className="bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-700">
-              {item.image && (
-                <div className="h-64 relative">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="object-cover w-full h-full"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                </div>
-              )}
-              <div className="p-8">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <span className="inline-block bg-blue-900/30 text-blue-400 px-3 py-1 rounded-full text-sm font-medium mb-3">
-                      {item.category}
-                    </span>
-                    <h1 className="text-3xl font-bold text-white mb-2">
-                      {item.title}
-                    </h1>
+          <div className="lg:col-span-2 space-y-6">
+            {/* Image and Basic Info */}
+            {item.image && (
+              <div className="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+                <React.Suspense fallback={<div className="h-64 bg-gray-700" />}>
+                  <div className="h-64 relative">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      layout="fill"
+                      className="object-cover"
+                      priority
+                      unoptimized
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   </div>
-                </div>
-                <p className="text-gray-300 mb-6">{item.description}</p>
+                </React.Suspense>
               </div>
-            </div>
+            )}
 
-            {/* Overview section */}
-            <div className="bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700">
-              <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
-                <FiCode className="mr-3 text-blue-400" />
-                Overview
-              </h2>
-              <p className="text-gray-300">{item.details.overview}</p>
-            </div>
-
-            {/* Features section */}
-            <div className="bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700">
-              <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
-                <FiCheckCircle className="mr-3 text-blue-400" />
-                Features
-              </h2>
-              <ul className="space-y-4">
-                {item.details.features.map((feature, index) => (
-                  <li key={index} className="flex items-start">
-                    <div className="flex-shrink-0 mt-1">
-                      {featureIcons[feature] || (
-                        <FiCheckCircle className="text-blue-400 mr-3" />
-                      )}
-                    </div>
-                    <span className="text-gray-300">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Prerequisites section */}
-            <div className="bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700">
-              <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
-                <FiDatabase className="mr-3 text-blue-400" />
-                Prerequisites
-              </h2>
-              <p className="text-gray-300">{item.details.prerequisites}</p>
+            <div className="bg-gray-800 rounded-xl shadow-lg p-8">
+              <span className="inline-block bg-blue-900/30 text-blue-400 px-3 py-1 rounded-full text-sm font-medium mb-3">
+                {item.category}
+              </span>
+              <h1 className="text-3xl font-bold text-white mb-2">
+                {item.title}
+              </h1>
+              <p className="text-gray-300">{item.description}</p>
             </div>
           </div>
 
           {/* Right Column - Contact Form */}
           <div className="lg:col-span-1">
-            <div className="bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700 sticky top-8">
+            <div className="bg-gray-800 rounded-xl shadow-lg p-8 sticky top-8">
               <h2 className="text-2xl font-bold text-white mb-6">
                 Request Support
               </h2>
-
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label
@@ -181,12 +190,12 @@ export default function SupportDetailsPage() {
                   <input
                     type="text"
                     id="name"
-                    className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 transition-all"
+                    name="name"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
                     placeholder="Your name"
                     required
                   />
                 </div>
-
                 <div>
                   <label
                     htmlFor="email"
@@ -194,20 +203,15 @@ export default function SupportDetailsPage() {
                   >
                     Email Address
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiMail className="text-gray-400" />
-                    </div>
-                    <input
-                      type="email"
-                      id="email"
-                      className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 transition-all"
-                      placeholder="your.email@example.com"
-                      required
-                    />
-                  </div>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
+                    placeholder="your.email@example.com"
+                    required
+                  />
                 </div>
-
                 <div>
                   <label
                     htmlFor="phone"
@@ -215,19 +219,48 @@ export default function SupportDetailsPage() {
                   >
                     Phone Number
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiPhone className="text-gray-400" />
-                    </div>
-                    <input
-                      type="tel"
-                      id="phone"
-                      className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 transition-all"
-                      placeholder="+1 (555) 123-4567"
-                    />
-                  </div>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
+                    placeholder="Your phone number"
+                    pattern="[0-9]{10}" // Optional validation for 10-digit numbers
+                    required
+                  />
                 </div>
-
+                <div>
+                  <label
+                    htmlFor="location"
+                    className="block text-sm font-medium text-gray-300 mb-2"
+                  >
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    id="location"
+                    name="location"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
+                    placeholder="Your location"
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="resume"
+                    className="block text-sm font-medium text-gray-300 mb-2"
+                  >
+                    Resume
+                  </label>
+                  <input
+                    type="file"
+                    id="resume"
+                    name="resume"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white"
+                    accept=".pdf,.doc,.docx"
+                    required
+                  />
+                </div>
                 <div>
                   <label
                     htmlFor="message"
@@ -235,37 +268,22 @@ export default function SupportDetailsPage() {
                   >
                     How can we help?
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 pt-3 flex items-start pointer-events-none">
-                      <FiMessageSquare className="text-gray-400" />
-                    </div>
-                    <textarea
-                      id="message"
-                      rows={5}
-                      className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 transition-all"
-                      placeholder="Describe your support needs..."
-                      required
-                    ></textarea>
-                  </div>
+                  <textarea
+                    id="message"
+                    name="message"
+                    rows={4}
+                    className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"
+                    placeholder="Describe your support needs..."
+                    required
+                  ></textarea>
                 </div>
-
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg text-white font-medium transition-all duration-300 shadow-lg hover:shadow-blue-500/20"
-                  >
-                    Submit Request
-                  </button>
-                </div>
-
-                <div className="text-center pt-4 border-t border-gray-700">
-                  <p className="text-xs text-gray-400">
-                    Need immediate help?{" "}
-                    <a href="#" className="text-blue-400 hover:underline">
-                      Contact our support team
-                    </a>
-                  </p>
-                </div>
+                <button
+                  type="submit"
+                  className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg"
+                  disabled={uploading}
+                >
+                  {uploading ? "Submitting..." : "Submit Request"}
+                </button>
               </form>
             </div>
           </div>
