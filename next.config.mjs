@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["firebasestorage.googleapis.com"], // Allows Firebase-hosted images
+    domains: ["firebasestorage.googleapis.com",'lh3.googleusercontent.com'], // Allows Firebase-hosted images
   },
 };
 

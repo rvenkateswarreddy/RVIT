@@ -7,7 +7,7 @@ import ProgressBar from "./components/ProgressBar"; // Preloading progress bar
 import dynamic from "next/dynamic";
 import "./globals.css";
 import { Geist, Geist_Mono } from "next/font/google";
-
+import {AuthProvider } from "./context/AuthContext";
 // Google Fonts with subsets
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,17 +34,19 @@ export default function RootLayout({ children }) {
       <body
         className={`antialiased ${geistSans.variable} ${geistMono.variable}`}
       >
+      <AuthProvider>
         <Suspense
           fallback={<div className="text-center text-gray-300">Loading...</div>}
         >
           <ProgressBar />
           <Navbar />
-          <GoogleSignInModal />
+       
           <main className="pt-16 md:pt-20 min-h-screen">{children}</main>
           <Footer />
         </Suspense>
+        </AuthProvider>
         {/* Lazy-loaded components */}
-        <CookiesBanner />
+
       </body>
     </html>
   );

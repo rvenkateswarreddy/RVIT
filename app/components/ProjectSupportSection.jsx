@@ -1,142 +1,119 @@
-"use client";
+import React, { useRef, useEffect, useState } from 'react';
+import { useInView } from 'framer-motion';
 
-import { useRef, useEffect, Suspense } from "react";
-import { useInView } from "framer-motion";
-
-// Technology stack data
-const techStack = [
-  // Frontend
-  { name: "React", icon: "⚛️" },
-  { name: "Angular", icon: "🅰️" },
-  { name: "Vue", icon: "🖖" },
-  { name: "Next.js", icon: "⏭️" },
-  { name: "TypeScript", icon: "📘" },
-  { name: "Tailwind", icon: "🎨" },
-
-  // Backend
-  { name: "Node.js", icon: "🟢" },
-  { name: "Python", icon: "🐍" },
-  { name: "Java", icon: "☕" },
-  { name: ".NET", icon: "🔷" },
-  { name: "Go", icon: "🐹" },
-  { name: "Ruby", icon: "💎" },
-
-  // Mobile
-  { name: "React Native", icon: "📱" },
-  { name: "Flutter", icon: "🦋" },
-  { name: "Swift", icon: "🍏" },
-  { name: "Kotlin", icon: "🟪" },
-
-  // Databases
-  { name: "MongoDB", icon: "🍃" },
-  { name: "PostgreSQL", icon: "🐘" },
-  { name: "MySQL", icon: "🐬" },
-  { name: "Redis", icon: "🔴" },
-
-  // DevOps
-  { name: "Docker", icon: "🐳" },
-  { name: "Kubernetes", icon: "☸️" },
-  { name: "AWS", icon: "☁️" },
-  { name: "Azure", icon: "🔵" },
-  { name: "Terraform", icon: "🏗️" },
-  { name: "Git", icon: "📌" },
+const supportServices = [
+  {
+    title: 'End-to-End Development',
+    description: 'Full lifecycle project support from requirements to deployment',
+    icon: '🔄',
+  },
+  {
+    title: 'Architecture Consulting',
+    description: 'Expert guidance on system design and technology selection',
+    icon: '🏛️',
+  },
+  {
+    title: 'Code Review & Audit',
+    description: 'Comprehensive analysis of your codebase for quality and security',
+    icon: '🔍',
+  },
+  {
+    title: 'Performance Optimization',
+    description: 'Identify and resolve bottlenecks in your applications',
+    icon: '⚡',
+  },
+  {
+    title: 'Legacy Modernization',
+    description: 'Transform outdated systems into modern, maintainable solutions',
+    icon: '🔄',
+  },
+  {
+    title: 'DevOps Implementation',
+    description: 'Establish CI/CD pipelines and infrastructure as code',
+    icon: '🛠️',
+  }
 ];
 
-export default function TechnologiesSection() {
+export const ProjectSupportSection=()=> {
   const sectionRef = useRef(null);
   const headingRef = useRef(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const contentRef = useRef(null);
+  const isInView = useInView(sectionRef, { once: true, margin: '-100px' });
+
+  // Track which cards are visible for animation
+  const [cardsVisible, setCardsVisible] = useState(Array(supportServices.length).fill(false));
 
   useEffect(() => {
     if (isInView) {
-      headingRef.current?.classList.add("animate-in-left");
+      headingRef.current?.classList.add('animate-in-left');
+      contentRef.current?.classList.add('animate-in-right');
+      // Animate cards in sequence
+      supportServices.forEach((_, idx) => {
+        setTimeout(() => {
+          setCardsVisible(prev => {
+            const updated = [...prev];
+            updated[idx] = true;
+            return updated;
+          });
+        }, idx * 100);
+      });
     }
   }, [isInView]);
 
   return (
     <section
       ref={sectionRef}
-      className="relative w-full overflow-hidden bg-gray-950 flex flex-col items-center justify-center py-16"
+      className="relative min-h-screen w-full overflow-hidden bg-gray-950 flex items-center justify-center py-20"
     >
-      <Suspense
-        fallback={<div className="text-white text-center">Loading...</div>}
-      >
-        <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-24 ">
-          <div className="text-center mb-16">
+      <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-24">
+        <div className="flex flex-col lg:flex-row gap-16 items-center">
+          {/* Left Content */}
+          <div className="lg:w-1/2">
             <h2
               ref={headingRef}
-              className="text-4xl md:text-5xl font-bold text-white mb-4 opacity-0"
+              className="text-4xl md:text-5xl font-bold text-white mb-8 opacity-0"
             >
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-                Technologies We Master
+                Project Support & Training
               </span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Our expertise spans across the entire technology stack
-            </p>
-          </div>
-
-          {/* Marquee Top (Left to Right) */}
-          <div className="overflow-hidden mb-8">
-            <div className="flex w-max">
-              <div className="flex items-center space-x-12 py-4 marquee-left">
-                {techStack.slice(0, 12).map((tech, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center space-x-3 bg-gray-800/50 px-6 py-3 rounded-full border border-gray-700"
-                  >
-                    <span className="text-xl">{tech.icon}</span>
-                    <span className="text-white font-medium">{tech.name}</span>
-                  </div>
-                ))}
-                {/* Duplicate for seamless loop */}
-                {techStack.slice(0, 12).map((tech, index) => (
-                  <div
-                    key={`dup-${index}`}
-                    className="flex items-center space-x-3 bg-gray-800/50 px-6 py-3 rounded-full border border-gray-700"
-                  >
-                    <span className="text-xl">{tech.icon}</span>
-                    <span className="text-white font-medium">{tech.name}</span>
-                  </div>
-                ))}
-              </div>
+            <div ref={contentRef} className="space-y-6 text-gray-300 opacity-0">
+              <p className="text-lg">
+                Our comprehensive project support services ensure your technology initiatives
+                are delivered on time, within budget, and to the highest quality standards.
+              </p>
+              <p className="text-lg">
+                Complemented by our technical training programs, we equip your teams
+                with the skills needed to maintain and extend your solutions long after
+                implementation.
+              </p>
+              <button className="mt-6 px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20">
+                Discuss Your Project
+              </button>
             </div>
           </div>
-
-          {/* Marquee Bottom (Right to Left) */}
-          <div className="overflow-hidden">
-            <div className="flex w-max">
-              <div className="flex items-center space-x-12 py-4 marquee-right">
-                {techStack.slice(12).map((tech, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center space-x-3 bg-gray-800/50 px-6 py-3 rounded-full border border-gray-700"
-                  >
-                    <span className="text-xl">{tech.icon}</span>
-                    <span className="text-white font-medium">{tech.name}</span>
-                  </div>
-                ))}
-                {/* Duplicate for seamless loop */}
-                {techStack.slice(12).map((tech, index) => (
-                  <div
-                    key={`dup-${index}`}
-                    className="flex items-center space-x-3 bg-gray-800/50 px-6 py-3 rounded-full border border-gray-700"
-                  >
-                    <span className="text-xl">{tech.icon}</span>
-                    <span className="text-white font-medium">{tech.name}</span>
-                  </div>
-                ))}
-              </div>
+          {/* Right Service Cards */}
+          <div className="lg:w-1/2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {supportServices.map((service, i) => (
+                <div
+                  key={service.title}
+                  className={`bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6 opacity-0 hover:bg-gray-700/30 transition-colors
+                    ${cardsVisible[i] ? 'animate-in-up opacity-100' : ''}`}
+                  style={{
+                    animationDelay: `${i * 0.1}s`
+                  }}
+                >
+                  <div className="text-3xl mb-4">{service.icon}</div>
+                  <h3 className="text-xl font-bold text-white mb-2">{service.title}</h3>
+                  <p className="text-gray-300">{service.description}</p>
+                </div>
+              ))}
             </div>
-          </div>
-
-          <div className="mt-16 text-center">
-            <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20 animate-in-up">
-              Explore Our Tech Expertise
-            </button>
           </div>
         </div>
-      </Suspense>
+      </div>
     </section>
   );
 }
+export default ProjectSupportSection; 

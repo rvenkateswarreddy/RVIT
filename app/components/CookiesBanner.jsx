@@ -1,43 +1,55 @@
 "use client";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 
-export default function CookiesBanner() {
-  const [showBanner, setShowBanner] = useState(false);
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function CookiesBanner({ visible, onAccept }) {
+  const [isVisible, setIsVisible] = useState(visible);
 
   useEffect(() => {
-    const cookiesAccepted = localStorage.getItem("cookiesAccepted");
-    if (!cookiesAccepted) {
-      setShowBanner(true);
-    }
-  }, []);
+    setIsVisible(visible);
+  }, [visible]);
 
-  const handleAcceptCookies = () => {
-    localStorage.setItem("cookiesAccepted", "true");
-    setShowBanner(false);
-  };
-
-  if (!showBanner) return null;
+  if (!isVisible) return null;
 
   return (
-    <motion.div
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: 100, opacity: 0 }}
-      className="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4 z-50"
-    >
-      <div className="flex justify-between items-center">
-        <p className="text-sm">
-          We use cookies to improve your experience. By continuing, you agree to
-          our cookie policy.
-        </p>
-        <button
-          onClick={handleAcceptCookies}
-          className="bg-blue-600 px-4 py-2 rounded-md text-white hover:bg-blue-700"
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.3 }}
+          className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 z-50 shadow-lg"
         >
-          Accept
-        </button>
-      </div>
-    </motion.div>
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
+            <div className="mb-4 md:mb-0 md:mr-8">
+              <h3 className="text-lg font-semibold mb-1">We use cookies</h3>
+              <p className="text-sm text-gray-300">
+                We use cookies to enhance your experience, analyze traffic, and for authentication purposes. 
+                By clicking "Accept", you consent to our use of cookies.
+              </p>
+            </div>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => {
+                  setIsVisible(false);
+                  onAccept();
+                }}
+                className="px-4 py-2 bg-blue-600 rounded-md hover:bg-blue-700 text-sm font-medium"
+              >
+                Accept
+              </button>
+              <button
+                onClick={() => setIsVisible(false)}
+                className="px-4 py-2 bg-gray-700 rounded-md hover:bg-gray-600 text-sm font-medium"
+              >
+                Decline
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

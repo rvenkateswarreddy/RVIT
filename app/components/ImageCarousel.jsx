@@ -1,11 +1,16 @@
 "use client";
 
-import React, { useRef, Suspense } from "react";
+import React, { useRef, Suspense, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Preload } from "@react-three/drei";
 import TechWorldBackground from "./TechWorldBackground"; // Separate the background into its own file for modularity
 
 const ImageCarousel = () => {
+  useEffect(() => {
+    if (window.location.hash === "") {
+      window.scrollTo(0, 0);
+    }
+  }, []);
   const heroRef = useRef(null);
 
   const services = [
@@ -20,7 +25,7 @@ const ImageCarousel = () => {
   return (
     <section
       ref={heroRef}
-      className="relative h-screen w-full overflow-hidden bg-gradient-to-b from-gray-900 to-gray-950 flex items-center justify-center pt-52 sm:pt-1"
+      className="relative h-screen w-full overflow-hidden bg-gradient-to-b from-gray-900 to-gray-950 flex items-center justify-center pt-32 sm:pt-1"
     >
       {/* Three.js Background */}
       <div className="absolute inset-0 z-0 opacity-40">

@@ -29,6 +29,10 @@ const RecruitmentSection = dynamic(
   () => import("./components/RecruitmentSection"),
   { suspense: true }
 );
+const TrainingSection = dynamic(
+  () => import("./components/TrainingSection"),
+  { suspense: true }
+);
 
 // Loading Spinner Component
 function LoadingSpinner() {
@@ -53,6 +57,9 @@ export default function Home() {
       </Suspense>
       <Suspense fallback={<LoadingSpinner />}>
         <TechnologiesSection />
+      </Suspense>
+      <Suspense fallback={<LoadingSpinner />}>
+        <TrainingSection />
       </Suspense>
       <Suspense fallback={<LoadingSpinner />}>
         <TestimonialsSection />
