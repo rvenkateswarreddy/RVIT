@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import { useInView } from 'framer-motion';
+import Link from 'next/link';
 
 const trainingPrograms = [
   {
@@ -167,12 +168,16 @@ export default function TrainingSection() {
           ref={ctaRef}
           className="text-center opacity-0"
         >
-          <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20 mr-4 mb-4 md:mb-0">
-            View All Courses
-          </button>
-          <button className="px-8 py-3 bg-transparent border-2 border-cyan-400 text-cyan-100 font-medium rounded-lg hover:bg-cyan-400/10 transition-colors">
-            Corporate Training Inquiry
-          </button>
+          <Link href="/trainings" passHref>
+            <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20 mr-4 mb-4 md:mb-0">
+              View All Courses
+            </button>
+          </Link>
+          <Link href="/contactUs" passHref>
+            <button className="px-8 py-3 bg-transparent border-2 border-cyan-400 text-cyan-100 font-medium rounded-lg hover:bg-cyan-400/10 transition-colors">
+              Corporate Training Inquiry  
+            </button>
+          </Link>
         </div>
       </div>
     </section>

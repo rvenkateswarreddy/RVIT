@@ -1,40 +1,75 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   FiArrowLeft,
   FiCheckCircle,
   FiZap,
+  FiLoader,
 } from "react-icons/fi";
 import { BsFire } from "react-icons/bs";
 import { MdOutlineTrendingUp } from "react-icons/md";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, doc, getDoc, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, db } from "../../../FirebaseConfig";
 import { useAuth } from "../../context/AuthContext";
 
-// Dynamically import Image for optimized loading
-const Image = dynamic(() => import("next/image"), { suspense: true });
+const Image = dynamic(() => import("next/image"), {  ssr: false });
+
+interface SupportItem {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  icon?: string;
+  image?: string;
+  overview?: string;
+  isTrending?: boolean;
+  details?: {
+    overview?: string;
+    features?: string[];
+    [key: string]: any;
+  };
+}
 
 export default function SupportDetailsPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const params = useParams();
+  const id = params?.id as string | undefined;
+  const [item, setItem] = useState<SupportItem | null>(null);
+  const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string>("");
   const { user, authLoading } = useAuth();
 
-  // Get support item data from query parameters
-  const getSupportItem = () => {
-    try {
-      const itemParam = searchParams.get("item");
-      if (!itemParam) return null;
-      return JSON.parse(itemParam);
-    } catch (e) {
-      return null;
+  // Fetch Support Item from Firestore
+  useEffect(() => {
+    async function fetchSupportItem() {
+      setLoading(true);
+      setError("");
+      try {
+        if (!id) {
+          setItem(null);
+          setLoading(false);
+          return;
+        }
+        const docRef = doc(db, "support", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setItem({ id: docSnap.id, ...docSnap.data() } as SupportItem);
+        } else {
+          setItem(null);
+        }
+      } catch (e) {
+        setError("Failed to fetch support service. Please try again.");
+        setItem(null);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
-
-  const item = getSupportItem();
+    fetchSupportItem();
+  }, [id]);
 
   // Defensive for details object
   const {
@@ -50,51 +85,6 @@ export default function SupportDetailsPage() {
   const detailsOverview = details?.overview || overview || "";
   const detailsFeatures = Array.isArray(details?.features) ? details.features : [];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!user) return; // Just in case
-    setUploading(true);
-    const formData = new FormData(e.target);
-
-    const requestData = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      phone: formData.get("phone"),
-      message: formData.get("message"),
-      location: formData.get("location"),
-      item: title,
-      userId: user.uid,
-    };
-
-    const resumeFile = formData.get("resume");
-
-    try {
-      // Upload resume to Firebase Storage
-      const storageRef = ref(
-        storage,
-        `resumes/${Date.now()}_${resumeFile.name}`
-      );
-      await uploadBytes(storageRef, resumeFile);
-
-      // Get the download URL
-      const fileURL = await getDownloadURL(storageRef);
-
-      requestData.resume = fileURL;
-
-      // Store request in Firestore
-      await addDoc(collection(db, "supportRequests"), requestData);
-
-      alert("Support request submitted successfully!");
-      router.push("/supports");
-    } catch (error) {
-      console.error("Error submitting support request:", error);
-      alert("Failed to submit the support request. Please try again.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // Icon for category badge
   const categoryBadgeIcon = useMemo(() => {
     switch (category) {
       case "programming":
@@ -104,16 +94,93 @@ export default function SupportDetailsPage() {
     }
   }, [category]);
 
-  if (!item) {
+  // Form submission
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!user) return;
+      setUploading(true);
+
+      try {
+        const formData = new FormData(e.currentTarget);
+        const name = (formData.get("name") as string).trim();
+        const email = (formData.get("email") as string).trim();
+        const phone = (formData.get("phone") as string).trim();
+        const message = (formData.get("message") as string).trim();
+        const location = (formData.get("location") as string).trim();
+        const resumeFile = formData.get("resume") as File;
+
+        // Basic validation
+        if (
+          !name ||
+          !email ||
+          !phone ||
+          !message ||
+          !location ||
+          !resumeFile
+        ) {
+          alert("All fields are required.");
+          setUploading(false);
+          return;
+        }
+
+        // Upload resume to Firebase Storage
+        const storageRef = ref(
+          storage,
+          `resumes/${user.uid}/${Date.now()}_${resumeFile.name.replace(/\s+/g, "_")}`
+        );
+        await uploadBytes(storageRef, resumeFile);
+
+        // Get the download URL
+        const fileURL = await getDownloadURL(storageRef);
+
+        // Store request in Firestore
+        await addDoc(collection(db, "supportRequests"), {
+          name,
+          email,
+          phone,
+          message,
+          location,
+          item: title,
+          itemId: id,
+          userId: user.uid,
+          resume: fileURL,
+          createdAt: new Date(),
+        });
+
+        alert("Support request submitted successfully!");
+        router.push("/supports");
+      } catch (error) {
+        console.error("Error submitting support request:", error);
+        alert("Failed to submit the support request. Please try again.");
+      } finally {
+        setUploading(false);
+      }
+    },
+    [user, title, id, router]
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
+        <div className="flex items-center space-x-4">
+          <FiLoader className="animate-spin text-4xl text-blue-400" />
+          <span className="text-white text-lg">Loading Support Service...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!item || error) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
         <div className="text-center max-w-md bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-700">
           <h1 className="text-2xl font-bold mb-4 text-white">
-            Support Item Not Found
+            {error ? "Error" : "Support Item Not Found"}
           </h1>
           <p className="text-gray-400 mb-6">
-            The support item you're looking for couldn't be found. Please check
-            the URL or return to the support page.
+            {error ||
+              "The support item you're looking for couldn't be found. Please check the URL or return to the support page."}
           </p>
           <button
             onClick={() => router.push("/supports")}
@@ -135,6 +202,8 @@ export default function SupportDetailsPage() {
           <button
             onClick={() => router.back()}
             className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
+            aria-label="Back to Supports"
+            type="button"
           >
             <FiArrowLeft className="mr-2" />
             Back to Supports
@@ -155,7 +224,7 @@ export default function SupportDetailsPage() {
                     <Image
                       src={image}
                       alt={title}
-                      layout="fill"
+                      fill
                       className="object-cover"
                       priority
                       unoptimized
@@ -223,22 +292,27 @@ export default function SupportDetailsPage() {
             </div>
 
             {/* Details Section (if any, show other details except features/overview) */}
-            {details && Object.keys(details).filter(k => !["features", "overview"].includes(k)).length > 0 && (
-              <div className="bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 rounded-2xl shadow-lg border border-blue-900/20 p-7 mt-8">
-                <h3 className="text-xl font-bold text-blue-200 mb-3">
-                  Additional Details
-                </h3>
-                <pre className="text-sm text-blue-100 break-words whitespace-pre-wrap">
-                  {JSON.stringify(
-                    Object.fromEntries(
-                      Object.entries(details).filter(([k]) => !["features", "overview"].includes(k))
-                    ),
-                    null,
-                    2
-                  )}
-                </pre>
-              </div>
-            )}
+            {details &&
+              Object.keys(details).filter(
+                (k) => !["features", "overview"].includes(k)
+              ).length > 0 && (
+                <div className="bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 rounded-2xl shadow-lg border border-blue-900/20 p-7 mt-8">
+                  <h3 className="text-xl font-bold text-blue-200 mb-3">
+                    Additional Details
+                  </h3>
+                  <pre className="text-sm text-blue-100 break-words whitespace-pre-wrap">
+                    {JSON.stringify(
+                      Object.fromEntries(
+                        Object.entries(details).filter(
+                          ([k]) => !["features", "overview"].includes(k)
+                        )
+                      ),
+                      null,
+                      2
+                    )}
+                  </pre>
+                </div>
+              )}
           </div>
 
           {/* Right Column - Contact Form */}
@@ -248,17 +322,23 @@ export default function SupportDetailsPage() {
                 <span className="inline-block">Request</span>
                 <span className="inline-block ml-2">Support</span>
               </h2>
-              {/* Show red warning if not logged in */}
               {!authLoading && !user && (
-                <div className="mb-6 w-full text-center">
+                <div className="mb-6 w-full text-center" aria-live="polite">
                   <span className="inline-block bg-red-100 text-red-800 border border-red-300 px-4 py-2 rounded-md font-medium text-sm">
                     Please log in to submit a support request.
                   </span>
                 </div>
               )}
-              <form onSubmit={handleSubmit} className="space-y-6 w-full">
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-6 w-full"
+                aria-disabled={uploading || !user}
+              >
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-blue-200 mb-2">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-blue-200 mb-2"
+                  >
                     Full Name <span className="text-red-400">*</span>
                   </label>
                   <input
@@ -269,10 +349,14 @@ export default function SupportDetailsPage() {
                     placeholder="Your name"
                     required
                     disabled={uploading || !user}
+                    autoComplete="name"
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-blue-200 mb-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-blue-200 mb-2"
+                  >
                     Email Address <span className="text-red-400">*</span>
                   </label>
                   <input
@@ -283,10 +367,14 @@ export default function SupportDetailsPage() {
                     placeholder="your.email@example.com"
                     required
                     disabled={uploading || !user}
+                    autoComplete="email"
                   />
                 </div>
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-blue-200 mb-2">
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-medium text-blue-200 mb-2"
+                  >
                     Phone Number <span className="text-red-400">*</span>
                   </label>
                   <input
@@ -295,13 +383,17 @@ export default function SupportDetailsPage() {
                     name="phone"
                     className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-blue-800 text-white placeholder-gray-400"
                     placeholder="Your phone number"
-                    pattern="[0-9]{10}"
+                    pattern="[0-9]{10,15}"
                     required
                     disabled={uploading || !user}
+                    autoComplete="tel"
                   />
                 </div>
                 <div>
-                  <label htmlFor="location" className="block text-sm font-medium text-blue-200 mb-2">
+                  <label
+                    htmlFor="location"
+                    className="block text-sm font-medium text-blue-200 mb-2"
+                  >
                     Location <span className="text-red-400">*</span>
                   </label>
                   <input
@@ -315,7 +407,10 @@ export default function SupportDetailsPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="resume" className="block text-sm font-medium text-blue-200 mb-2">
+                  <label
+                    htmlFor="resume"
+                    className="block text-sm font-medium text-blue-200 mb-2"
+                  >
                     Resume <span className="text-red-400">*</span>
                   </label>
                   <input
@@ -329,7 +424,10 @@ export default function SupportDetailsPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-blue-200 mb-2">
+                  <label
+                    htmlFor="message"
+                    className="block text-sm font-medium text-blue-200 mb-2"
+                  >
                     How can we help? <span className="text-red-400">*</span>
                   </label>
                   <textarea

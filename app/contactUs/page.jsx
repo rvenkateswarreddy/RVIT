@@ -49,7 +49,7 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h3 className="text-gray-400 text-sm font-medium">Email</h3>
-                    <p className="text-gray-200">contact@tirupati.com</p>
+                    <p className="text-gray-200">support@rvit.co.in</p>
                   </div>
                 </div>
               </div>

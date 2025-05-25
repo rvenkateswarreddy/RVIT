@@ -27,7 +27,7 @@ const Footer = () => {
         { name: 'About', href: '/about' },
         { name: 'Careers', href: '/careers' },
         { name: 'Blog', href: '/blog' },
-        { name: 'Contact', href: '/contact' },
+        { name: 'Contact', href: '/contactUs' },
       ],
     },
     {
@@ -76,11 +76,11 @@ const Footer = () => {
           <div className="footer-section opacity-0 flex-1 flex flex-col items-center lg:items-start">
             <div className="flex items-center mb-4">
               <Image
-                src={logo}
+                src="/logo3.png"
                 alt="RV IT Consulting"
-                width={40}
-                height={40}
-                className="h-10 w-auto"
+                width={80}
+                height={80}
+                className="h-20 w-auto"
               />
               <span className="ml-3 text-xl font-bold text-white">
                 RV IT Consulting

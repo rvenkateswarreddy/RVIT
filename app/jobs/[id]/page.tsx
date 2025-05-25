@@ -1,62 +1,46 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { FiArrowLeft } from "react-icons/fi";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../../FirebaseConfig";
-import { formatData } from "../../components/utils/formatData";
-import { useAuth } from "../../context/AuthContext"; // <-- import useAuth
+import { useAuth } from "../../context/AuthContext";
+import SkillGrid from "../../components/SkillGrid";
 
-// SkillCard: uniform width/height, professional look
-const SkillCard = ({ skill }) => (
-  <span
-    className="
-      flex items-center justify-center
-      min-w-[110px] min-h-[44px] max-w-[140px] max-h-[44px]
-      px-5 py-2
-      rounded-xl
-      font-semibold text-base tracking-wide
-      bg-gradient-to-br from-blue-900 via-blue-700 to-blue-800
-      text-blue-100 shadow-md border border-blue-500/40
-      hover:bg-blue-800/80 hover:shadow-lg transition-all
-      uppercase
-      select-none
-      text-center
-      m-1
-    "
-    style={{
-      aspectRatio: "3/1",
-    }}
-  >
-    {skill}
-  </span>
-);
-
-const SkillGrid = ({ skills }) => (
-  <div className="flex flex-wrap items-center gap-2 mt-3 mb-2">
-    {skills.map((skill, idx) => (
-      <SkillCard key={idx} skill={skill} />
-    ))}
-  </div>
-);
+interface JobType {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  description: string;
+  requirements?: string[];
+  responsibilities?: string[];
+  skills?: string[];
+  salary?: string;
+  experience?: string;
+  type?: string;
+}
 
 export default function JobApplicationPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const params = useParams();
+  const jobId = params?.id as string | undefined;
+  const [job, setJob] = useState<JobType | null>(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     portfolio: "",
-    coverLetterFile: null,
-    resumeFile: null,
+    coverLetterFile: null as File | null,
+    resumeFile: null as File | null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { user, authLoading } = useAuth(); // <-- Auth
+  const { user, authLoading } = useAuth();
 
-  // Autofill name/email if logged in and modal opens
+  // Autofill name/email if logged in
   useEffect(() => {
     if (user && !authLoading) {
       setFormData((prev) => ({
@@ -67,18 +51,113 @@ export default function JobApplicationPage() {
     }
   }, [user, authLoading]);
 
-  // Get job data from query parameters
-  const getJobData = () => {
-    try {
-      const jobParam = searchParams.get("job");
-      if (!jobParam) return null;
-      return JSON.parse(jobParam);
-    } catch (e) {
-      return null;
+  // Fetch job data from Firestore
+  useEffect(() => {
+    async function fetchJob() {
+      setLoading(true);
+      try {
+        if (!jobId) {
+          setJob(null);
+          setLoading(false);
+          return;
+        }
+        const docRef = doc(db, "rvit_jobs", jobId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setJob({ id: docSnap.id, ...docSnap.data() } as JobType);
+        } else {
+          setJob(null);
+        }
+      } catch (e) {
+        setJob(null);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+    fetchJob();
+  }, [jobId]);
 
-  const job = getJobData();
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files && files[0] ? files[0] : null,
+    }));
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!user) return;
+    setIsSubmitting(true);
+
+    try {
+      const requestData: any = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        portfolio: formData.portfolio || "",
+        resumeUrl: "",
+        coverLetterUrl: "",
+        jobTitle: job?.title,
+        companyName: job?.company,
+        location: job?.location,
+        dateApplied: new Date().toISOString(),
+        userId: user.uid,
+        jobId: job?.id,
+      };
+
+      // Upload resume if provided
+      if (formData.resumeFile) {
+        const resumeRef = ref(
+          storage,
+          `resumes/${user.uid}/${Date.now()}_${formData.resumeFile.name.replace(/\s+/g, "_")}`
+        );
+        await uploadBytes(resumeRef, formData.resumeFile);
+        const resumeUrl = await getDownloadURL(resumeRef);
+        requestData.resumeUrl = resumeUrl;
+      }
+
+      // Upload cover letter if provided
+      if (formData.coverLetterFile) {
+        const coverLetterRef = ref(
+          storage,
+          `coverLetters/${user.uid}/${Date.now()}_${formData.coverLetterFile.name.replace(/\s+/g, "_")}`
+        );
+        await uploadBytes(coverLetterRef, formData.coverLetterFile);
+        const coverLetterUrl = await getDownloadURL(coverLetterRef);
+        requestData.coverLetterUrl = coverLetterUrl;
+      }
+
+      await addDoc(collection(db, "jobRequests"), requestData);
+
+      alert("Application submitted successfully!");
+      router.push("/jobs");
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      alert("Failed to submit the application. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+          <p>Loading job details...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!job) {
     return (
@@ -95,80 +174,6 @@ export default function JobApplicationPage() {
         </div>
       </div>
     );
-  }
-
-  // Input change for text/url/tel/email fields
-  function handleInputChange(e) {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-
-  // File change handler
-  function handleFileChange(e) {
-    const { name, files } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: files && files[0] ? files[0] : null,
-    }));
-  }
-
-  // Form submit
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!user) return; // prevent submission if not logged in
-    setIsSubmitting(true);
-
-    try {
-      const requestData = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        portfolio: formData.portfolio || "",
-        resumeUrl: "",
-        coverLetterUrl: "",
-        jobTitle: job.title,
-        companyName: job.company,
-        location: job.location,
-        dateApplied: new Date().toISOString(),
-        userId: user.uid, // Save user's UID
-      };
-
-      // Upload resume if provided
-      if (formData.resumeFile) {
-        const resumeRef = ref(
-          storage,
-          `resumes/${Date.now()}_${formData.resumeFile.name}`
-        );
-        await uploadBytes(resumeRef, formData.resumeFile);
-        const resumeUrl = await getDownloadURL(resumeRef);
-        requestData.resumeUrl = resumeUrl;
-      }
-
-      // Upload cover letter if provided
-      if (formData.coverLetterFile) {
-        const coverLetterRef = ref(
-          storage,
-          `coverLetters/${Date.now()}_${formData.coverLetterFile.name}`
-        );
-        await uploadBytes(coverLetterRef, formData.coverLetterFile);
-        const coverLetterUrl = await getDownloadURL(coverLetterRef);
-        requestData.coverLetterUrl = coverLetterUrl;
-      }
-
-      // Add job request data to Firestore
-      await addDoc(collection(db, "jobRequests"), requestData);
-
-      alert("Application submitted successfully!");
-      router.push("/jobs");
-    } catch (error) {
-      console.error("Error submitting application:", error);
-      alert("Failed to submit the application. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
   }
 
   return (
@@ -208,38 +213,13 @@ export default function JobApplicationPage() {
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-blue-400 mb-3">Key Requirements</h3>
                 <ul className="list-disc ml-6 space-y-2 text-gray-200 text-base leading-relaxed">
-                  {job.requirements.map((req, idx) => (
+                  {job?.requirements?.map((req, idx) => (
                     <li key={idx}>{req}</li>
                   ))}
                 </ul>
               </div>
             )}
-            {job.skills && job.skills.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-green-400 mb-4">Required Skills</h3>
-                <div className="flex flex-col gap-3">
-                  {job.skills.map((skill, idx) => (
-                    <div
-                      key={idx}
-                      className="
-                        inline-flex items-center
-                        bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700
-                        border border-blue-500/30
-                        rounded-lg shadow
-                        min-h-[42px] px-6 py-2
-                        text-base text-blue-100
-                        uppercase tracking-wide
-                        hover:bg-blue-800/80 hover:scale-105 hover:shadow-xl
-                        transition-all duration-200
-                        select-none
-                      "
-                    >
-                      {skill}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <SkillGrid skills={job.skills || []} label="Required Skills" />
             {job.responsibilities && job.responsibilities.length > 0 && (
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-purple-400 mb-3">Responsibilities</h3>
@@ -251,7 +231,7 @@ export default function JobApplicationPage() {
               </div>
             )}
           </section>
-          {/* APPLICATION FORM - Wider and better styled */}
+          {/* APPLICATION FORM */}
           <section className="bg-gradient-to-b from-gray-800/90 to-gray-900/90 p-10 rounded-2xl shadow-2xl border border-blue-900/40 flex flex-col justify-center mt-8 xl:mt-0 xl:col-span-5 w-full max-w-2xl mx-auto">
             <h2 className="text-3xl font-extrabold text-center mb-10 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-600 bg-clip-text text-transparent tracking-tight drop-shadow-md">
               Job Application Form
@@ -324,6 +304,7 @@ export default function JobApplicationPage() {
                   onChange={handleFileChange}
                   required
                   disabled={isSubmitting || !user}
+                  accept=".pdf,.doc,.docx"
                 />
               </div>
               <div className="space-y-1">
@@ -337,6 +318,7 @@ export default function JobApplicationPage() {
                   className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white file:bg-gradient-to-r file:from-blue-700 file:to-blue-600 file:text-white file:rounded-lg file:px-4 file:py-2 file:border-none focus:ring-2 focus:ring-blue-500 transition cursor-pointer"
                   onChange={handleFileChange}
                   disabled={isSubmitting || !user}
+                  accept=".pdf,.doc,.docx"
                 />
               </div>
               <div>

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, Suspense } from 'react';
 import { useInView } from 'framer-motion';
-import LoadingSkeleton from '../components/ui/LoadingSkeleton';
+import {LoadingSkeleton} from '../components/ui/LoadingSkeleton';
 
 function AboutUsContent() {
   const refs = Array.from({ length: 4 }, () => useRef(null));

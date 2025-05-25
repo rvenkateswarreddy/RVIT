@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, Suspense } from 'react';
 import { useInView } from 'framer-motion';
-import LoadingSkeleton from '../components/ui/LoadingSkeleton';
+import {LoadingSkeleton} from '../components/ui/LoadingSkeleton';
 
 function StaffingContent() {
   const refs = Array.from({ length: 4 }, () => useRef(null));
@@ -66,7 +66,7 @@ function StaffingContent() {
       >
         <h2 className="text-2xl font-bold text-white mb-4">Get Started</h2>
         <p className="text-gray-300">
-          Looking for exceptional IT talent? <a href="/contact" className="text-cyan-400 underline hover:text-cyan-300">Contact us</a> to discuss your staffing needs and learn how RV IT Consulting can help your business grow.
+          Looking for exceptional IT talent? <a href="/contactUs" className="text-cyan-400 underline hover:text-cyan-300">Contact us</a> to discuss your staffing needs and learn how RV IT Consulting can help your business grow.
         </p>
       </div>
     </div>

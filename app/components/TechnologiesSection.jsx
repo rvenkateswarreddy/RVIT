@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, Suspense } from "react";
 import { useInView } from "framer-motion";
+import Link from "next/link";
 
 // Technology stack data
 const techStack = [
@@ -131,9 +132,11 @@ export default function TechnologiesSection() {
           </div>
 
           <div className="mt-16 text-center">
-            <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20 animate-in-up">
-              Explore Our Tech Expertise
-            </button>
+            <Link href="/tech-expertise" passHref>
+              <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20 animate-in-up">
+                Explore Our Tech Expertise
+              </button>
+            </Link>
           </div>
         </div>
       </Suspense>

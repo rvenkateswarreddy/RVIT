@@ -155,10 +155,10 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <Image
-              src="/assets/rvitlogo.png"
-              alt="ERRTEKNALOZY Logo"
-              width={160}
-              height={60}
+              src="/logo3.png"
+              alt="Rv IT Logo"
+              width={100}
+              height={40}
               className="object-contain"
               priority
             />
@@ -167,7 +167,7 @@ export default function Navbar() {
           {/* Desktop Menu */}
           <nav className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <Link
+              <a
                 key={link.id}
                 href={link.id}
                 className={`flex items-center px-3 py-2 text-base font-medium transition-all rounded-md ${
@@ -178,7 +178,7 @@ export default function Navbar() {
               >
                 <span className="mr-2">{link.icon}</span>
                 {link.label}
-              </Link>
+              </a>
             ))}
           </nav>
 

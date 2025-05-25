@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useInView } from 'framer-motion';
-
+import Link from 'next/link';
 const supportServices = [
   {
     title: 'End-to-End Development',
@@ -87,9 +87,11 @@ export const ProjectSupportSection=()=> {
                 with the skills needed to maintain and extend your solutions long after
                 implementation.
               </p>
-              <button className="mt-6 px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20">
-                Discuss Your Project
-              </button>
+             <Link href="/supports" passHref>
+  <button className="mt-6 px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20">
+    Discuss Your Project
+  </button>
+</Link>
             </div>
           </div>
           {/* Right Service Cards */}

@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import { useInView } from "framer-motion";
-
+    import Link from "next/link";
 // Recruitment process steps
 const recruitmentProcess = [
   {
@@ -93,14 +93,20 @@ export default function RecruitmentSection() {
           ))}
         </div>
 
-        <div className="text-center">
-          <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20 mr-4">
-            Hire Talent
-          </button>
-          <button className="px-8 py-3 bg-transparent border-2 border-cyan-400 text-cyan-100 font-medium rounded-lg hover:bg-cyan-400/10 transition-colors">
-            Find Jobs
-          </button>
-        </div>
+    
+
+<div className="text-center">
+  <Link href="/jobs" passHref>
+    <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20 mr-4">
+      Immediate Hiring
+    </button>
+  </Link>
+  <Link href="/jobs" passHref>
+    <button className="px-8 py-3 bg-transparent border-2 border-cyan-400 text-cyan-100 font-medium rounded-lg hover:bg-cyan-400/10 transition-colors">
+      Find Jobs
+    </button>
+  </Link>
+</div>
       </div>
     </section>
   );

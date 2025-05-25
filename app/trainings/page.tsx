@@ -1,18 +1,12 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../FirebaseConfig";
-import {
-  QueryClient,
-  QueryClientProvider,
-} from "react-query";
-import { FiSearch, FiFilter } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
 
-const queryClient = new QueryClient();
-
+// Category options (extract to a constants file for reusability in prod)
 const categories = [
   "All",
   "Programming Language Support",
@@ -64,70 +58,92 @@ const categories = [
   "Travel & Tourism Tech Support",
 ];
 
-export default function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TrainingPage />
-    </QueryClientProvider>
-  );
+// TypeScript interface for safety and maintainability
+interface Training {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  imageUrl?: string;
 }
 
-function TrainingPage() {
-  const [trainings, setTrainings] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
+export default function TrainingsPage() {
+  const [trainings, setTrainings] = useState<Training[]>([]);
   const [loading, setLoading] = useState(true);
-  const [navigatingTo, setNavigatingTo] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
 
+  // Fetch trainings from Firestore
   useEffect(() => {
-    const fetchTrainings = async () => {
+    let isMounted = true;
+    async function fetchTrainings() {
+      setLoading(true);
       try {
         const querySnapshot = await getDocs(collection(db, "trainings"));
-        const trainingsData = querySnapshot.docs.map((doc) => ({
+        const data: Training[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        }));
-        setTrainings(trainingsData);
+        })) as Training[];
+        if (isMounted) setTrainings(data);
       } catch (error) {
+        // You might want to use a toast/snackbar for prod
         console.error("Error fetching trainings:", error);
       } finally {
         setLoading(false);
       }
-    };
-
+    }
     fetchTrainings();
+    return () => { isMounted = false; };
   }, []);
 
-  const filteredTrainings = trainings.filter((training) => {
-    const matchesSearch = training.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || training.category === selectedCategory;
+  // Reset page on filters
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory]);
 
-    return matchesSearch && matchesCategory;
-  });
+  // Debounce search for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 250);
+
+  // Filter and paginate
+  const filteredTrainings = useMemo(() => {
+    return trainings.filter((training) => {
+      const matchesSearch = training.title
+        .toLowerCase()
+        .includes(debouncedSearchTerm.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All" || training.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [trainings, debouncedSearchTerm, selectedCategory]);
 
   const ITEMS_PER_PAGE = 6;
   const totalPages = Math.ceil(filteredTrainings.length / ITEMS_PER_PAGE);
-
   const paginatedTrainings = filteredTrainings.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
+  const handleNextPage = useCallback(() => {
+    if (currentPage < totalPages) setCurrentPage((p) => p + 1);
+  }, [currentPage, totalPages]);
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
+  const handlePreviousPage = useCallback(() => {
+    if (currentPage > 1) setCurrentPage((p) => p - 1);
+  }, [currentPage]);
 
-  const handleCardClick = (id) => {
+  const handleCardClick = useCallback((id: string) => {
     setNavigatingTo(id);
-  };
+  }, []);
+
+  // Accessibility: announce navigation
+  useEffect(() => {
+    if (navigatingTo) {
+      const timer = setTimeout(() => setNavigatingTo(null), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [navigatingTo]);
 
   if (loading) {
     return (
@@ -141,21 +157,25 @@ function TrainingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Page Header */}
-        <div className="text-center mb-12">
+        {/* SEO: Put <head> in head.tsx for App Router */}
+        <header className="text-center mb-12">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl drop-shadow">
             Our <span className="text-blue-400">Trainings</span>
           </h1>
           <p className="text-xl text-gray-300 mt-4 max-w-2xl mx-auto">
             Explore our industry-leading courses designed to boost your skills
           </p>
-        </div>
+        </header>
 
         {/* Search and Filters */}
-        <div className="bg-gray-800 p-9  rounded-xl mb-10 shadow-2xl border border-blue-800/20">
-          <div className="flex flex-col md:flex-row md:items-center gap-4 mb-3">
+        <section className="bg-gray-800 p-9 rounded-xl mb-10 shadow-2xl border border-blue-800/20" aria-label="Search and filter trainings">
+          <form
+            className="flex flex-col md:flex-row md:items-center gap-4 mb-3"
+            onSubmit={(e) => e.preventDefault()}
+            role="search"
+          >
             {/* Search Bar with Icon */}
             <div className="relative w-full md:w-1/2">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-400 pointer-events-none">
@@ -167,14 +187,15 @@ function TrainingPage() {
                 placeholder="Search trainings..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Search trainings"
               />
             </div>
-            {/* Filter Section with Icon */}
+            {/* Filter Section */}
             <div className="flex gap-4 w-full md:w-auto items-center">
-              
               <select
                 className="bg-gray-700 text-white p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                 value={selectedCategory}
+                aria-label="Select training category"
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
                 {categories.map((category) => (
@@ -184,44 +205,48 @@ function TrainingPage() {
                 ))}
               </select>
               <button
+                type="button"
                 onClick={() => {
                   setSearchTerm("");
                   setSelectedCategory("All");
                 }}
                 className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-xl font-semibold"
+                aria-label="Reset filters"
               >
                 Reset Filters
               </button>
             </div>
-          </div>
-        </div>
+          </form>
+        </section>
 
         {/* Training Cards */}
         {paginatedTrainings.length ? (
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+          <section className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3" aria-label="Trainings list">
             {paginatedTrainings.map((training) => (
               <div
                 key={training.id}
                 className={`relative bg-gradient-to-br from-gray-800 via-gray-900 to-blue-950 rounded-2xl overflow-hidden border border-blue-800/30 shadow-xl hover:shadow-blue-700/40 transition-all duration-300 transform hover:-translate-y-3 hover:scale-105 group ${
                   navigatingTo === training.id ? "opacity-70" : ""
                 }`}
+                tabIndex={0}
+                aria-label={training.title}
+                role="listitem"
               >
                 <Link
-                  href={{
-                    pathname: `/trainings/${training.id}`,
-                    query: { training: JSON.stringify(training) },
-                  }}
+                  href={`/trainings/${training.id}`}
                   onClick={() => handleCardClick(training.id)}
-                  className="block h-full"
+                  className="block h-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  aria-label={`View details of ${training.title}`}
                 >
                   <div className="relative h-60 group">
                     {training.imageUrl ? (
                       <Image
                         src={training.imageUrl}
                         alt={training.title}
-                        layout="fill"
-                        objectFit="cover"
-                        className="transition-all duration-300 group-hover:opacity-90 group-hover:scale-105"
+                        fill
+                        className="object-cover transition-all duration-300 group-hover:opacity-90 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        priority={false}
                       />
                     ) : (
                       <div className="h-full bg-gradient-to-r from-blue-700 to-blue-600 flex items-center justify-center text-white text-lg font-medium">
@@ -255,7 +280,7 @@ function TrainingPage() {
                 </Link>
               </div>
             ))}
-          </div>
+          </section>
         ) : (
           <div className="text-center py-16">
             <div className="text-gray-400 text-xl mb-4">
@@ -275,7 +300,7 @@ function TrainingPage() {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex justify-between items-center mt-12">
+          <nav className="flex justify-between items-center mt-12" aria-label="Pagination">
             <button
               onClick={handlePreviousPage}
               disabled={currentPage === 1}
@@ -284,6 +309,7 @@ function TrainingPage() {
                   ? "bg-gray-700 text-gray-500 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-xl"
               }`}
+              aria-disabled={currentPage === 1}
             >
               Previous
             </button>
@@ -298,12 +324,23 @@ function TrainingPage() {
                   ? "bg-gray-700 text-gray-500 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-xl"
               }`}
+              aria-disabled={currentPage === totalPages}
             >
               Next
             </button>
-          </div>
+          </nav>
         )}
       </div>
-    </div>
+    </main>
   );
+}
+
+// Debounce hook for production search UX
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debounced;
 }

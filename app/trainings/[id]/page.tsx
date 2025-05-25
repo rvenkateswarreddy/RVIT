@@ -1,17 +1,34 @@
 "use client";
-
-import React, { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { FiChevronLeft } from "react-icons/fi";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, doc, getDoc, addDoc } from "firebase/firestore";
 import { db } from "../../../FirebaseConfig";
-import { useAuth } from "../../context/AuthContext"; // <-- Import the Auth Context
+import { useAuth } from "../../context/AuthContext";
+import { generateMetadata } from "./head";
+interface Training {
+  id: string;
+  title: string;
+  description: string;
+  fullDescription?: string;
+  category: string;
+  trainingMode: string;
+  instructor: string;
+  imageUrl?: string;
+  additionalImages?: string[];
+  syllabus?: string[];
+  technologies?: string[];
+  brochureLink?: string | null;
+}
 
 export default function TrainingDetailPage() {
-  const searchParams = useSearchParams();
+  const router = useRouter();
+  const params = useParams();
+  const id = params?.id as string | undefined;
+  const [training, setTraining] = useState<Training | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -22,68 +39,36 @@ export default function TrainingDetailPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { user, authLoading } = useAuth(); // <-- Get user and loading state
+  const { user, authLoading } = useAuth();
 
-  // Safely parse the training data with defaults
-  let training;
-  try {
-    training = JSON.parse(searchParams.get("training") || "{}");
-  } catch {
-    training = {};
-  }
-
-  // Default values for all required fields
-  const safeTraining = {
-    id: 0,
-    title: "Training Program",
-    description: "No description available",
-    fullDescription: "Detailed description not provided",
-    category: "General",
-    trainingMode: "Online",
-    instructor: "Certified Instructor",
-    image: "/images/default-training.jpg",
-    additionalImages: [],
-    syllabus: ["Course content not specified"],
-    technologies: ["Technology stack not listed"],
-    brochureLink: null,
-    ...training,
-  };
-
-  const handleInputChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!user) return; // prevent submission if not logged in
-    setIsSubmitting(true);
-
-    const requestData = {
-      ...formData,
-      trainingTitle: safeTraining.title,
-      userId: user.uid,
-    };
-
-    try {
-      await addDoc(collection(db, "trainingRequests"), requestData);
-      alert("Your enrollment request has been submitted successfully!");
-      setIsModalOpen(false);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        location: "",
-        description: "",
-      });
-    } catch (error) {
-      console.error("Error submitting enrollment request:", error);
-      alert("Failed to submit your request. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+  // Fetch training by ID
+  useEffect(() => {
+    async function fetchTraining() {
+      setLoading(true);
+      try {
+        if (!id) {
+          setTraining(null);
+          setLoading(false);
+          return;
+        }
+        const docRef = doc(db, "trainings", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setTraining({ id: docSnap.id, ...docSnap.data() } as Training);
+        } else {
+          setTraining(null);
+        }
+      } catch (e) {
+        setTraining(null);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+    fetchTraining();
+  }, [id]);
 
   // Autofill name/email if logged in and modal opens
-  React.useEffect(() => {
+  useEffect(() => {
     if (isModalOpen && user && !authLoading) {
       setFormData((prev) => ({
         ...prev,
@@ -93,13 +78,115 @@ export default function TrainingDetailPage() {
     }
   }, [isModalOpen, user, authLoading]);
 
+  // Set default values for training if missing fields
+  const safeTraining = useMemo<Training>(
+    () => ({
+      id: training?.id || "",
+      title: training?.title || "Training Program",
+      description: training?.description || "No description available",
+      fullDescription: training?.fullDescription || "Detailed description not provided",
+      category: training?.category || "General",
+      trainingMode: training?.trainingMode || "Online",
+      instructor: training?.instructor || "Certified Instructor",
+      imageUrl: training?.imageUrl || "/images/default-training.jpg",
+      additionalImages: training?.additionalImages || [],
+      syllabus: training?.syllabus && training.syllabus.length > 0
+        ? training.syllabus
+        : ["Course content not specified"],
+      technologies: training?.technologies && training.technologies.length > 0
+        ? training.technologies
+        : ["Technology stack not listed"],
+      brochureLink: training?.brochureLink || null,
+    }),
+    [training]
+  );
+
+  // Form changes
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value })),
+    []
+  );
+
+  // Submit handler
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!user) return;
+      setIsSubmitting(true);
+      try {
+        // Validate fields
+        if (
+          !formData.name.trim() ||
+          !formData.email.trim() ||
+          !formData.phone.trim() ||
+          !formData.location.trim() ||
+          !formData.description.trim()
+        ) {
+          alert("All fields are required.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const requestData = {
+          ...formData,
+          trainingTitle: safeTraining.title,
+          userId: user.uid,
+          createdAt: new Date(),
+        };
+        await addDoc(collection(db, "trainingRequests"), requestData);
+        alert("Your enrollment request has been submitted successfully!");
+        setIsModalOpen(false);
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          location: "",
+          description: "",
+        });
+      } catch (error) {
+        console.error("Error submitting enrollment request:", error);
+        alert("Failed to submit your request. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [formData, safeTraining.title, user]
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+          <p>Loading training details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!training) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-4">Training Not Found</h1>
+          <p className="mb-6">
+            The training you are looking for does not exist. Please check the URL or return to the trainings page.
+          </p>
+          <Link
+            href="/trainings"
+            className="inline-flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors"
+          >
+            <FiChevronLeft className="mr-2" /> Back to Trainings
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <motion.section
-      className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 py-12 px-4 sm:px-6 lg:px-8"
-      initial="hidden"
-      animate="visible"
-      transition={{ duration: 0.5 }}
-    >
+   
+    <section className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Back Link */}
         <div className="mb-10">
@@ -116,7 +203,7 @@ export default function TrainingDetailPage() {
           <div className="lg:sticky lg:top-20 lg:h-[82vh]">
             <div className="relative h-full w-full rounded-2xl overflow-hidden bg-gradient-to-br from-blue-900 via-gray-800 to-gray-800 shadow-2xl border border-blue-900/30">
               <Image
-                src={safeTraining.imageUrl || "/images/default-training.jpg"}
+                src={safeTraining.imageUrl!}
                 alt={safeTraining.title}
                 fill
                 className="object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105"
@@ -135,13 +222,13 @@ export default function TrainingDetailPage() {
 
             {/* Tags with shadow effect */}
             <div className="flex flex-wrap gap-4 mb-7 text-sm">
-              <span className="inline-block bg-blue-700/30 text-blue-200 font-semibold px-5 py-2 rounded-lg border border-blue-400/30 shadow-lg shadow-blue-700/20 uppercase tracking-widest transition transform hover:scale-105 hover:shadow-blue-500/40">
+              <span className="inline-block bg-blue-700/30 text-blue-200 font-semibold px-5 py-2 rounded-lg border border-blue-400/30 shadow-lg shadow-blue-700/20 uppercase tracking-widest">
                 {safeTraining.category}
               </span>
-              <span className="inline-block bg-pink-800/30 text-pink-200 font-semibold px-5 py-2 rounded-lg border border-pink-400/30 shadow-lg shadow-pink-700/20 uppercase tracking-widest transition transform hover:scale-105 hover:shadow-pink-400/40">
+              <span className="inline-block bg-pink-800/30 text-pink-200 font-semibold px-5 py-2 rounded-lg border border-pink-400/30 shadow-lg shadow-pink-700/20 uppercase tracking-widest">
                 TrainingMode : {safeTraining.trainingMode}
               </span>
-              <span className="inline-block bg-green-700/30 text-green-200 font-semibold px-5 py-2 rounded-lg border border-green-400/30 shadow-lg shadow-green-700/20 uppercase tracking-widest transition transform hover:scale-105 hover:shadow-green-400/40">
+              <span className="inline-block bg-green-700/30 text-green-200 font-semibold px-5 py-2 rounded-lg border border-green-400/30 shadow-lg shadow-green-700/20 uppercase tracking-widest">
                 Instructor: {safeTraining.instructor}
               </span>
             </div>
@@ -150,7 +237,7 @@ export default function TrainingDetailPage() {
             <div className="mb-6">
               <div className="bg-gradient-to-r from-blue-900/70 via-gray-900/70 to-blue-800/70 rounded-xl px-6 py-6 shadow-2xl border border-blue-800/30">
                 <h2 className="text-2xl font-bold text-white mb-3 drop-shadow">Training Overview</h2>
-                <p className="text-gray-200 text-lg leading-relaxed transition-colors duration-200">
+                <p className="text-gray-200 text-lg leading-relaxed">
                   {safeTraining.fullDescription}
                 </p>
               </div>
@@ -160,7 +247,7 @@ export default function TrainingDetailPage() {
             <div className="mb-5">
               <h2 className="text-2xl font-bold text-white mb-4 drop-shadow">What You'll Learn</h2>
               <ul className="space-y-3 text-blue-100 text-lg font-medium">
-                {safeTraining.syllabus.map((item, index) => (
+                {safeTraining.syllabus!.map((item, index) => (
                   <li
                     key={index}
                     className="flex items-start shadow hover:shadow-blue-700/30 transition-all bg-blue-900/30 rounded-lg px-4 py-2 group"
@@ -197,13 +284,8 @@ export default function TrainingDetailPage() {
 
       {/* Modal Form */}
       {isModalOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto min-h-screen">
-    <motion.div
-      className="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900 border border-blue-800/50 rounded-2xl shadow-2xl w-full max-w-lg p-10 relative max-h-[90vh] overflow-y-auto"
-      initial={{ opacity: 0, scale: 0.97, y: 20 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
-    >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto min-h-screen">
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900 border border-blue-800/50 rounded-2xl shadow-2xl w-full max-w-lg p-10 relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
@@ -217,7 +299,6 @@ export default function TrainingDetailPage() {
             <h2 className="text-2xl font-extrabold text-white mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500">
               Enrollment Form
             </h2>
-            {/* Show red warning if not logged in */}
             {!authLoading && !user && (
               <div className="mb-6 w-full text-center">
                 <span className="inline-block bg-red-100 text-red-800 border border-red-300 px-4 py-2 rounded-md font-medium text-sm">
@@ -333,9 +414,9 @@ export default function TrainingDetailPage() {
                 </button>
               </div>
             </form>
-          </motion.div>
+          </div>
         </div>
       )}
-    </motion.section>
+    </section>
   );
 }
