@@ -1,67 +1,60 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiMail, FiLock, FiUser, FiLogIn } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
-import { auth } from "../../FirebaseConfig";
-import { 
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile
-} from "firebase/auth";
-import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 
-export default function LoginModal({ isOpen, onClose, onGoogleSignIn, onSuccess }) {
+export default function LoginModal() {
+  const [isOpen, setIsOpen] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  const { user, signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth();
 
-    try {
-      if (isLogin) {
-        // Handle login with email/password
-        await signInWithEmailAndPassword(auth, email, password);
-      } else {
-        // Handle signup with email/password
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        if (name) {
-          await updateProfile(userCredential.user, { displayName: name });
+  // Listen for the open event
+  useEffect(() => {
+    const handler = () => setIsOpen(true);
+    window.addEventListener("openLoginModal", handler);
+    return () => window.removeEventListener("openLoginModal", handler);
+  }, []);
+
+  // 1. 👇 Auto-close the modal after login or signup (including Google)
+  useEffect(() => {
+    if (user && isOpen) {
+      setIsOpen(false);
+      setEmail("");
+      setPassword("");
+      setName("");
+      setError("");
+    }
+  }, [user, isOpen]);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoading(true);
+      setError("");
+      try {
+        if (isLogin) {
+          await signInWithEmail(email, password);
+        } else {
+          await signUpWithEmail(email, password, name);
         }
+        // setIsOpen(false); // No need, handled by user effect above!
+        // setEmail(""); setPassword(""); setName(""); setError("");
+      } catch (err: any) {
+        setError(err.message || "An error occurred. Please try again.");
+      } finally {
+        setLoading(false);
       }
-      onSuccess();
-      onClose();
-    } catch (err) {
-      setError(getFirebaseError(err.code));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getFirebaseError = (code) => {
-    switch (code) {
-      case 'auth/email-already-in-use':
-        return 'This email is already registered. Please sign in.';
-      case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
-      case 'auth/weak-password':
-        return 'Password should be at least 6 characters.';
-      case 'auth/user-not-found':
-        return 'No account found with this email.';
-      case 'auth/wrong-password':
-        return 'Incorrect password. Please try again.';
-      default:
-        return 'An error occurred. Please try again.';
-    }
-  };
+    },
+    [isLogin, email, password, name, signInWithEmail, signUpWithEmail]
+  );
 
   return (
     <AnimatePresence>
@@ -72,14 +65,17 @@ export default function LoginModal({ isOpen, onClose, onGoogleSignIn, onSuccess 
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-label={isLogin ? "Sign in to your account" : "Create an account"}
           >
             <button
-              onClick={onClose}
+              onClick={() => setIsOpen(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              aria-label="Close modal"
             >
               <FiX size={24} />
             </button>
-
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
                 {isLogin ? "Sign in to your account" : "Create an account"}
@@ -88,27 +84,23 @@ export default function LoginModal({ isOpen, onClose, onGoogleSignIn, onSuccess 
                 {isLogin ? "Welcome back!" : "Join us today!"}
               </p>
             </div>
-
             {error && (
               <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
                 {error}
               </div>
             )}
-
             <button
-              onClick={onGoogleSignIn}
+              onClick={signInWithGoogle}
               className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 mb-4"
             >
               <FcGoogle size={20} />
               {isLogin ? "Sign in with Google" : "Sign up with Google"}
             </button>
-
             <div className="flex items-center my-4">
               <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
               <span className="mx-4 text-gray-500 dark:text-gray-400 text-sm">OR</span>
               <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
             </div>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <div>
@@ -132,7 +124,6 @@ export default function LoginModal({ isOpen, onClose, onGoogleSignIn, onSuccess 
                   </div>
                 </div>
               )}
-
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Email address
@@ -153,7 +144,6 @@ export default function LoginModal({ isOpen, onClose, onGoogleSignIn, onSuccess 
                   />
                 </div>
               </div>
-
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Password
@@ -175,29 +165,6 @@ export default function LoginModal({ isOpen, onClose, onGoogleSignIn, onSuccess 
                   />
                 </div>
               </div>
-
-              {isLogin && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <input
-                      id="remember-me"
-                      name="remember-me"
-                      type="checkbox"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                      Remember me
-                    </label>
-                  </div>
-
-                  <div className="text-sm">
-                    <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-                      Forgot your password?
-                    </a>
-                  </div>
-                </div>
-              )}
-
               <button
                 type="submit"
                 disabled={loading}
@@ -213,7 +180,6 @@ export default function LoginModal({ isOpen, onClose, onGoogleSignIn, onSuccess 
                 )}
               </button>
             </form>
-
             <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
               {isLogin ? (
                 <>

@@ -27,7 +27,7 @@ const categories = [
 ];
 const jobTypes = ["All", "Full-time", "Contract", "Part-time"];
 const experienceLevels = ["All", "Junior", "Mid-level", "Senior"];
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 // --- Utility: Debounce Hook ---
 function useDebounce<T>(value: T, delay: number): T {

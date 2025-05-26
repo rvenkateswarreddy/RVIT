@@ -27,7 +27,7 @@ export default function JobApplicationPage() {
   const params = useParams();
   const jobId = params?.id as string | undefined;
   const [job, setJob] = useState<JobType | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading1, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -38,18 +38,18 @@ export default function JobApplicationPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { user, authLoading } = useAuth();
+  const { user, loading } = useAuth();
 
   // Autofill name/email if logged in
   useEffect(() => {
-    if (user && !authLoading) {
+    if (user && !loading) {
       setFormData((prev) => ({
         ...prev,
         name: user.displayName || "",
         email: user.email || "",
       }));
     }
-  }, [user, authLoading]);
+  }, [user, loading]);
 
   // Fetch job data from Firestore
   useEffect(() => {
@@ -148,7 +148,7 @@ export default function JobApplicationPage() {
     }
   }
 
-  if (loading) {
+  if (loading1) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
         <div className="flex flex-col items-center">
@@ -236,7 +236,7 @@ export default function JobApplicationPage() {
             <h2 className="text-3xl font-extrabold text-center mb-10 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-600 bg-clip-text text-transparent tracking-tight drop-shadow-md">
               Job Application Form
             </h2>
-            {!authLoading && !user && (
+            {!loading && !user && (
               <div className="mb-6 w-full text-center">
                 <span className="inline-block bg-red-100 text-red-800 border border-red-300 px-4 py-2 rounded-md font-medium text-sm">
                   Please log in to apply for this job.
