@@ -1,9 +1,6 @@
 "use client";
 
-import React, { useRef, Suspense, useEffect } from "react";
-import { Canvas } from "@react-three/fiber";
-import { Preload } from "@react-three/drei";
-import TechWorldBackground from "./TechWorldBackground"; // Separate the background into its own file for modularity
+import React, { useRef, useEffect } from "react";
 import Link from "next/link";
 
 const ImageCarousel = () => {
@@ -28,18 +25,8 @@ const ImageCarousel = () => {
       ref={heroRef}
       className="relative h-screen w-full overflow-hidden bg-gradient-to-b from-gray-900 to-gray-950 flex items-center justify-center pt-32 sm:pt-1"
     >
-      {/* Three.js Background */}
-      <div className="absolute inset-0 z-0 opacity-40">
-        <Canvas camera={{ position: [0, 0, 1] }}>
-          <Suspense fallback={<div className="text-white">Loading...</div>}>
-            <TechWorldBackground />
-          </Suspense>
-          <Preload all />
-        </Canvas>
-      </div>
-
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-repeat opacity-10" />
+      {/* Background Grid Pattern */}
+      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-repeat opacity-10 z-0" />
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-24 xl:px-32 flex flex-col items-center text-center">
