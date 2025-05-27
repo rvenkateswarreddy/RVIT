@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import LoadingSkeleton from '../components/ui/LoadingSkeleton';
+import {LoadingSkeleton} from '../components/ui/LoadingSkeleton';
 import PrivacyPolicyContent from '../components/legal/PrivacyPolicyContent';
 // NOTE: The Metadata export and type are not valid in plain JSX/React. 
 // If this is for a Next.js page using the App Router and you want metadata,

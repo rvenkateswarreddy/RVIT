@@ -28,7 +28,7 @@ export default function TrainingDetailPage() {
   const params = useParams();
   const id = params?.id as string | undefined;
   const [training, setTraining] = useState<Training | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading1, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -39,7 +39,7 @@ export default function TrainingDetailPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { user, authLoading } = useAuth();
+  const { user, loading } = useAuth();
 
   // Fetch training by ID
   useEffect(() => {
@@ -69,14 +69,14 @@ export default function TrainingDetailPage() {
 
   // Autofill name/email if logged in and modal opens
   useEffect(() => {
-    if (isModalOpen && user && !authLoading) {
+    if (isModalOpen && user && !loading) {
       setFormData((prev) => ({
         ...prev,
         name: user.displayName || "",
         email: user.email || "",
       }));
     }
-  }, [isModalOpen, user, authLoading]);
+  }, [isModalOpen, user, loading]);
 
   // Set default values for training if missing fields
   const safeTraining = useMemo<Training>(
@@ -154,7 +154,7 @@ export default function TrainingDetailPage() {
     [formData, safeTraining.title, user]
   );
 
-  if (loading) {
+  if (loading1) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
         <div className="flex flex-col items-center">
@@ -245,7 +245,7 @@ export default function TrainingDetailPage() {
 
             {/* What You'll Learn */}
             <div className="mb-5">
-              <h2 className="text-2xl font-bold text-white mb-4 drop-shadow">What You'll Learn</h2>
+              <h2 className="text-2xl font-bold text-white mb-4 drop-shadow">What You ll Learn</h2>
               <ul className="space-y-3 text-blue-100 text-lg font-medium">
                 {safeTraining.syllabus!.map((item, index) => (
                   <li
@@ -299,7 +299,7 @@ export default function TrainingDetailPage() {
             <h2 className="text-2xl font-extrabold text-white mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500">
               Enrollment Form
             </h2>
-            {!authLoading && !user && (
+            {!loading && !user && (
               <div className="mb-6 w-full text-center">
                 <span className="inline-block bg-red-100 text-red-800 border border-red-300 px-4 py-2 rounded-md font-medium text-sm">
                   Please log in to enroll for this training.

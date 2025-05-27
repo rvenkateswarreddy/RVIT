@@ -66,13 +66,13 @@ const ContactPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         <div className="text-center mb-16">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-100 mb-4">
-            Get in{" "}
+            Get in
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">
               Touch
             </span>
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Have a project in mind? Let's collaborate and create something
+            Have a project in mind? Lets collaborate and create something
             extraordinary together.
           </p>
         </div>

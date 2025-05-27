@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import LoadingSkeleton from '../components/ui/LoadingSkeleton';
+import {LoadingSkeleton} from '../components/ui/LoadingSkeleton';
 import TermsContent from '../components/legal/TermsContent';
 
 export default function TermsPage() {

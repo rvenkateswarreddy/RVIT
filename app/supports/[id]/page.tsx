@@ -38,10 +38,10 @@ export default function SupportDetailsPage() {
   const params = useParams();
   const id = params?.id as string | undefined;
   const [item, setItem] = useState<SupportItem | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading1, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string>("");
-  const { user, authLoading } = useAuth();
+  const { user, loading } = useAuth();
 
   // Fetch Support Item from Firestore
   useEffect(() => {
@@ -160,12 +160,12 @@ export default function SupportDetailsPage() {
     [user, title, id, router]
   );
 
-  if (loading) {
+  if (loading1) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center">
         <div className="flex items-center space-x-4">
           <FiLoader className="animate-spin text-4xl text-blue-400" />
-          <span className="text-white text-lg">Loading Support Service...</span>
+          <span className="text-white text-lg">loading Support Service...</span>
         </div>
       </div>
     );
@@ -322,7 +322,7 @@ export default function SupportDetailsPage() {
                 <span className="inline-block">Request</span>
                 <span className="inline-block ml-2">Support</span>
               </h2>
-              {!authLoading && !user && (
+              {!loading && !user && (
                 <div className="mb-6 w-full text-center" aria-live="polite">
                   <span className="inline-block bg-red-100 text-red-800 border border-red-300 px-4 py-2 rounded-md font-medium text-sm">
                     Please log in to submit a support request.
