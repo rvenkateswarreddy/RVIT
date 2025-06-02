@@ -35,13 +35,17 @@ const footerLinks = [
   {
     title: "Connect",
     links: [
-      { name: "LinkedIn", href: "https://linkedin.com/company/rvit" },
-      { name: "Twitter", href: "https://twitter.com/rvit" },
-      { name: "Facebook", href: "https://facebook.com/rvit" },
-      { name: "GitHub", href: "https://github.com/rvenkat307" },
+      { name: "LinkedIn", href: "" },
+      { name: "Twitter", href: "" },
+      { name: "Facebook", href: "" },
+      { name: "GitHub", href: "" },
     ],
   },
 ];
+
+// Utility to create a unique key for each footer link even if href is blank
+const makeLinkKey = (sectionTitle: string, linkName: string, linkHref: string, index: number) =>
+  `${sectionTitle}-${linkName}-${linkHref || "blank"}-${index}`;
 
 export default function Footer() {
   const footerRef = useRef<HTMLDivElement>(null);
@@ -88,6 +92,14 @@ export default function Footer() {
       setLoading(false);
     }
   };
+
+  // Social links with unique keys (all hrefs blank for now, will update later)
+  const socialLinks = [
+    { name: "Facebook", href: "", icon: "📘" },
+    { name: "Twitter", href: "", icon: "🐦" },
+    { name: "LinkedIn", href: "", icon: "🔗" },
+    { name: "GitHub", href: "", icon: "🐙" },
+  ];
 
   return (
     <footer
@@ -165,16 +177,16 @@ export default function Footer() {
                   {section.title}
                 </h3>
                 <ul className="mt-4 space-y-3">
-                  {section.links.map((link) => (
-                    <li key={link.href}>
+                  {section.links.map((link, linkIdx) => (
+                    <li key={makeLinkKey(section.title, link.name, link.href, linkIdx)}>
                       <Link
-                        href={link.href}
+                        href={link.href || "#"}
                         className="text-base text-gray-400 hover:text-cyan-400 transition-colors flex items-center"
-                        target={link.href.startsWith("http") ? "_blank" : undefined}
-                        rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                        target={link.href && link.href.startsWith("http") ? "_blank" : undefined}
+                        rel={link.href && link.href.startsWith("http") ? "noopener noreferrer" : undefined}
                       >
                         {link.name}
-                        {link.href.startsWith("http") && (
+                        {link.href && link.href.startsWith("http") && (
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
@@ -203,15 +215,10 @@ export default function Footer() {
           </p>
           {/* Social links */}
           <div className="flex space-x-6">
-            {[
-              { name: "Facebook", href: "https://facebook.com", icon: "📘" },
-              { name: "Twitter", href: "https://twitter.com", icon: "🐦" },
-              { name: "LinkedIn", href: "https://linkedin.com", icon: "🔗" },
-              { name: "GitHub", href: "https://github.com", icon: "🐙" },
-            ].map((social) => (
+            {socialLinks.map((social, idx) => (
               <Link
-                key={social.name}
-                href={social.href}
+                key={`social-${social.name}-${idx}`}
+                href={social.href || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-cyan-400 transition-colors text-xl"

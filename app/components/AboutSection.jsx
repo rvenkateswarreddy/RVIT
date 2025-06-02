@@ -22,11 +22,14 @@ export default function AboutSection() {
           {/* Image Section */}
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 blur-xl opacity-40 rounded-lg" />
-            <img
-              src="/assets/globe.png"
-              alt="Global IT Consulting"
-              className="relative z-10 rounded-lg shadow-lg hover:scale-105 transform transition-transform duration-500"
-            />
+          <img
+  src="/assets/globe.png"
+  alt="Global IT Consulting"
+  width="800"
+  height="600"
+  className="relative z-10 rounded-lg shadow-lg hover:scale-105 transform transition-transform"
+/>
+
           </div>
 
           {/* Text Section */}

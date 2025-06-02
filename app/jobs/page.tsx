@@ -366,11 +366,7 @@ export default function JobsPage() {
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0YTIgMiAwIDEgMSAwLTQgMiAyIDAgMCAxIDAgNHptMC0xMmEyIDIgMCAxIDEgMC00IDIgMiAwIDAgMSAwIDR6bTAgMTJhMiAyIDAgMSAxIDAtNCAyIDIgMCAwIDEgMCA0em0xMiAxMmEyIDIgMCAxIDEgMC00IDIgMiAwIDAgMSAwIDR6bTAgMTJhMiAyIDAgMSAxIDAtNCAyIDIgMCAwIDEgMCA0em0xMi0yNGEyIDIgMCAxIDEgMC00IDIgMiAwIDAgMSAwIDR6Ii8+PC9nPjwvZz48L3N2Zz4=')]"></div>
         </div>
         <div className="max-w-7xl mx-auto text-center relative z-10">
-          <Link href="/immediate-hirings">
-            <div className="bg-gradient-to-r from-red-700 via-red-500 to-yellow-400 py-2 px-6 rounded-xl shadow-lg animate-pulse text-white font-bold text-lg cursor-pointer mb-6">
-              🚨 Urgent Immediate Joinings! Click Here 🚨
-            </div>
-          </Link>
+         
           <h1 className="text-5xl md:text-6xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500 animate-gradient-move">
             Career Opportunities
           </h1>

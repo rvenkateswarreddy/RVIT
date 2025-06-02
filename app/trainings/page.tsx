@@ -190,8 +190,8 @@ export default function TrainingsPage() {
                 aria-label="Search trainings"
               />
             </div>
-            {/* Filter Section */}
-            <div className="flex gap-4 w-full md:w-auto items-center">
+            {/* Filter Section - Responsive: category and reset button */}
+            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto items-stretch md:items-center">
               <select
                 className="bg-gray-700 text-white p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                 value={selectedCategory}
@@ -204,13 +204,14 @@ export default function TrainingsPage() {
                   </option>
                 ))}
               </select>
+              {/* On small screens, button is full-width and below. On md+, inline with select. */}
               <button
                 type="button"
                 onClick={() => {
                   setSearchTerm("");
                   setSelectedCategory("All");
                 }}
-                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-xl font-semibold"
+                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-xl font-semibold w-full md:w-auto"
                 aria-label="Reset filters"
               >
                 Reset Filters
