@@ -61,14 +61,15 @@ export default function Home() {
       <Suspense fallback={<LoadingSpinner />}>
         <TrainingSection />
       </Suspense>
-      <Suspense fallback={<LoadingSpinner />}>
-        <TestimonialsSection />
-      </Suspense>
+     
       <Suspense fallback={<LoadingSpinner />}>
         <ProjectSupportSection />
       </Suspense>
       <Suspense fallback={<LoadingSpinner />}>
         <RecruitmentSection />
+      </Suspense>
+       <Suspense fallback={<LoadingSpinner />}>
+        <TestimonialsSection />
       </Suspense>
     </main>
   );

@@ -1,233 +1,150 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-import { useInView } from "framer-motion";
-import Link from "next/link";
-import Image from "next/image";
-import { db } from "../../FirebaseConfig";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-
-const footerLinks = [
-  {
-    title: "Services",
-    links: [
-      { name: "Recruitment", href: "/jobs" },
-      { name: "Staffing", href: "/staffing" },
-      { name: "Project Support", href: "/supports" },
-      { name: "Training", href: "/trainings" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { name: "About", href: "/about" },
-      { name: "Careers", href: "/careers" },
-      { name: "Contact", href: "/contactUs" },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { name: "Privacy", href: "/privacy" },
-      { name: "Terms", href: "/terms" },
-      { name: "Cookie Policy", href: "/cookie-policy" },
-    ],
-  },
-  {
-    title: "Connect",
-    links: [
-      { name: "LinkedIn", href: "" },
-      { name: "Twitter", href: "" },
-      { name: "Facebook", href: "" },
-      { name: "GitHub", href: "" },
-    ],
-  },
-];
-
-// Utility to create a unique key for each footer link even if href is blank
-const makeLinkKey = (sectionTitle: string, linkName: string, linkHref: string, index: number) =>
-  `${sectionTitle}-${linkName}-${linkHref || "blank"}-${index}`;
+"use client"
+import Link from 'next/link';
+import { Mail, Phone, MapPin, Clock, Linkedin, Twitter, Facebook, Instagram } from 'lucide-react';
 
 export default function Footer() {
-  const footerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(footerRef, { once: true, margin: "-100px" });
-
-  // Newsletter subscribe state
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isInView && footerRef.current) {
-      const sections = footerRef.current.querySelectorAll(".footer-section");
-      sections.forEach((section, i) => {
-        setTimeout(() => {
-          section.classList.add("animate-fadeInUp");
-        }, i * 100);
-      });
-    }
-  }, [isInView]);
-
-  // Real-time subscribe handler
-  const handleSubscribe = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setSubscribed(false);
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-    setLoading(true);
-    try {
-      await addDoc(collection(db, "newsletter"), {
-        email,
-        subscribedAt: serverTimestamp(),
-      });
-      setSubscribed(true);
-      setEmail("");
-    } catch (err) {
-      setError("Failed to subscribe. Please try again.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Social links with unique keys (all hrefs blank for now, will update later)
-  const socialLinks = [
-    { name: "Facebook", href: "", icon: "📘" },
-    { name: "Twitter", href: "", icon: "🐦" },
-    { name: "LinkedIn", href: "", icon: "🔗" },
-    { name: "GitHub", href: "", icon: "🐙" },
-  ];
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer
-      ref={footerRef}
-      className="bg-gray-900 border-t border-gray-800 relative overflow-hidden"
-    >
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-repeat opacity-5 pointer-events-none" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12 relative z-10">
-        {/* Top Section */}
-        <div className="flex flex-col gap-12 lg:flex-row lg:gap-8">
-          {/* Logo and description */}
-          <div className="footer-section opacity-0 flex-1 flex flex-col items-center lg:items-start">
-            <div className="flex items-center mb-4">
-              <Image
-                src="/logo3.png"
-                alt="RV IT Consulting"
-                width={80}
-                height={80}
-                className="h-20 w-auto"
-              />
-              <span className="ml-3 text-xl font-bold text-white">
-                RV IT Consulting
+    <footer className="bg-gray-950 text-gray-300 border-t border-gray-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {/* Company Info */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-bold text-white">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+                Consulihgn
               </span>
-            </div>
-            <p className="text-gray-400 text-base text-center lg:text-left">
-              Delivering innovative IT solutions through recruitment, staffing,
-              project support, and training services.
+            </h3>
+            <p className="text-gray-400">
+              50 years of Google-level expertise serving diverse industries with cutting-edge IT solutions.
             </p>
-            {/* Newsletter signup */}
-            <div className="mt-6 w-full max-w-sm">
-              <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase mb-2 text-center lg:text-left">
-                Subscribe to our newsletter
-              </h3>
-              <form className="flex" onSubmit={handleSubscribe}>
-                <input
-                  type="email"
-                  placeholder="Your email"
-                  className="flex-1 bg-gray-800 border border-gray-700 rounded-l-lg px-4 py-2 text-white focus:border-cyan-500 focus:outline-none"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setError(null);
-                    setSubscribed(false);
-                  }}
-                  required
-                  disabled={loading}
-                />
-                <button
-                  type="submit"
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-r-lg disabled:opacity-60"
-                  disabled={loading}
-                >
-                  {loading ? "Subscribing..." : "Subscribe"}
-                </button>
-              </form>
-              {error && (
-                <div className="text-red-500 text-xs mt-2">{error}</div>
-              )}
-              {subscribed && (
-                <div className="text-green-500 text-xs mt-2">
-                  Subscribed successfully!
-                </div>
-              )}
+            <div className="flex space-x-4">
+              <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                <Linkedin size={20} />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                <Twitter size={20} />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                <Facebook size={20} />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                <Instagram size={20} />
+              </a>
             </div>
           </div>
-          {/* Footer links */}
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 flex-[2]">
-            {footerLinks.map((section, i) => (
-              <div
-                key={section.title}
-                className="footer-section opacity-0"
-                style={{ transitionDelay: `${i * 100 + 200}ms` }}
-              >
-                <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">
-                  {section.title}
-                </h3>
-                <ul className="mt-4 space-y-3">
-                  {section.links.map((link, linkIdx) => (
-                    <li key={makeLinkKey(section.title, link.name, link.href, linkIdx)}>
-                      <Link
-                        href={link.href || "#"}
-                        className="text-base text-gray-400 hover:text-cyan-400 transition-colors flex items-center"
-                        target={link.href && link.href.startsWith("http") ? "_blank" : undefined}
-                        rel={link.href && link.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                      >
-                        {link.name}
-                        {link.href && link.href.startsWith("http") && (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            className="w-4 h-4 ml-1"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        )}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-lg font-semibold text-white mb-6">Quick Links</h4>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/services" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  Services
+                </Link>
+              </li>
+              <li>
+                <Link href="/industries" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  Industries
+                </Link>
+              </li>
+              <li>
+                <Link href="/" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  Case Studies
+                </Link>
+              </li>
+              <li>
+                <Link href="/" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div>
+            <h4 className="text-lg font-semibold text-white mb-6">Services</h4>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  IT Consulting
+                </Link>
+              </li>
+              <li>
+                <Link href="/" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  Cloud Solutions
+                </Link>
+              </li>
+              <li>
+                <Link href="/" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  Cybersecurity
+                </Link>
+              </li>
+              <li>
+                <Link href="/" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  Data Analytics
+                </Link>
+              </li>
+              <li>
+                <Link href="/" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  Software Development
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div className="space-y-6">
+            <h4 className="text-lg font-semibold text-white">Contact Us</h4>
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <MapPin className="flex-shrink-0 mt-1 text-cyan-400" size={18} />
+                <span className="text-gray-400">123 Tech Park, Silicon Valley, CA 94025</span>
               </div>
-            ))}
+              <div className="flex items-center space-x-3">
+                <Mail className="text-cyan-400" size={18} />
+                <a href="mailto:contact@rvit.co.in" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  contact@rvit.co.in.
+                </a>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Phone className="text-cyan-400" size={18} />
+                <a href="tel:+18005551234" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  +1 (800) 555-1234
+                </a>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Clock className="text-cyan-400" size={18} />
+                <span className="text-gray-400">Mon-Fri: 9AM - 6PM</span>
+              </div>
+            </div>
           </div>
         </div>
-        {/* Bottom section */}
-        <div className="mt-16 border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-base text-gray-400 text-center md:text-left">
-            &copy; {new Date().getFullYear()} RV IT Consulting. All rights reserved.
+
+        {/* Divider */}
+        <div className="border-t border-gray-800 mt-12"></div>
+
+        {/* Bottom Footer */}
+        <div className="mt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-gray-500 text-sm">
+            &copy; {currentYear} RV IT CONSULTING. All rights reserved.
           </p>
-          {/* Social links */}
-          <div className="flex space-x-6">
-            {socialLinks.map((social, idx) => (
-              <Link
-                key={`social-${social.name}-${idx}`}
-                href={social.href || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-cyan-400 transition-colors text-xl"
-                aria-label={social.name}
-              >
-                <span className="sr-only">{social.name}</span>
-                <span aria-hidden>{social.icon}</span>
-              </Link>
-            ))}
+          <div className="flex space-x-6 mt-4 md:mt-0">
+            <Link href="/privacy-policy" className="text-gray-500 hover:text-cyan-400 text-sm transition-colors">
+              Privacy Policy
+            </Link>
+            <Link href="/terms-of-service" className="text-gray-500 hover:text-cyan-400 text-sm transition-colors">
+              Terms of Service
+            </Link>
+            <Link href="/cookies" className="text-gray-500 hover:text-cyan-400 text-sm transition-colors">
+              Cookie Policy
+            </Link>
           </div>
         </div>
       </div>

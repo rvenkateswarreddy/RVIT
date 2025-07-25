@@ -1,121 +1,102 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { useInView } from 'framer-motion';
-import Link from 'next/link';
-const supportServices = [
+"use client";
+import { motion } from "framer-motion";
+
+const supports = [
   {
-    title: 'End-to-End Development',
-    description: 'Full lifecycle project support from requirements to deployment',
-    icon: '🔄',
+    type: "Full-Time Support",
+    icon: "🕓",
+    highlights: [
+      "Dedicated engineers for your project",
+      "Seamless team integration",
+      "Priority response & support",
+      "Flexible ramp-up as business grows"
+    ]
   },
   {
-    title: 'Architecture Consulting',
-    description: 'Expert guidance on system design and technology selection',
-    icon: '🏛️',
+    type: "Part-Time Support",
+    icon: "⏳",
+    highlights: [
+      "On-demand specialist access",
+      "Cost-effective for dynamic needs",
+      "Remote or onsite options",
+      "Ideal for SMEs & pilot projects"
+    ]
   },
   {
-    title: 'Code Review & Audit',
-    description: 'Comprehensive analysis of your codebase for quality and security',
-    icon: '🔍',
-  },
-  {
-    title: 'Performance Optimization',
-    description: 'Identify and resolve bottlenecks in your applications',
-    icon: '⚡',
-  },
-  {
-    title: 'Legacy Modernization',
-    description: 'Transform outdated systems into modern, maintainable solutions',
-    icon: '🔄',
-  },
-  {
-    title: 'DevOps Implementation',
-    description: 'Establish CI/CD pipelines and infrastructure as code',
-    icon: '🛠️',
+    type: "Contract / Project-Based",
+    icon: "📄",
+    highlights: [
+      "Fixed scope or retainer models",
+      "Rapid team deployment",
+      "Clear milestones & deliverables",
+      "Industry-certified consultants"
+    ]
   }
 ];
 
-export const ProjectSupportSection=()=> {
-  const sectionRef = useRef(null);
-  const headingRef = useRef(null);
-  const contentRef = useRef(null);
-  const isInView = useInView(sectionRef, { once: true, margin: '-100px' });
-
-  // Track which cards are visible for animation
-  const [cardsVisible, setCardsVisible] = useState(Array(supportServices.length).fill(false));
-
-  useEffect(() => {
-    if (isInView) {
-      headingRef.current?.classList.add('animate-in-left');
-      contentRef.current?.classList.add('animate-in-right');
-      // Animate cards in sequence
-      supportServices.forEach((_, idx) => {
-        setTimeout(() => {
-          setCardsVisible(prev => {
-            const updated = [...prev];
-            updated[idx] = true;
-            return updated;
-          });
-        }, idx * 100);
-      });
-    }
-  }, [isInView]);
-
-  return (
-    <section
-      ref={sectionRef}
-      className="relative min-h-screen w-full overflow-hidden bg-gray-950 flex items-center justify-center py-20"
+const ProjectSupportShowcase = () => (
+  <section className="relative py-20 px-4 bg-gradient-to-br from-[#05080e] via-[#0b101a] to-[#1a2130] text-white overflow-x-hidden">
+    <div className="max-w-5xl mx-auto text-center mb-16">
+      <motion.h2
+        className="text-3xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent drop-shadow"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+      >
+        Flexible Project Support
+      </motion.h2>
+      <motion.p
+        className="text-lg md:text-2xl text-gray-300 max-w-2xl mx-auto"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        Choose the engagement model that fits your business: full-time, part-time, or contract-based support from expert teams.
+      </motion.p>
+    </div>
+    {/* Support Cards - Innovative Floating Style */}
+    <div className="flex flex-wrap gap-8 justify-center items-stretch relative z-10">
+      {supports.map((support, idx) => (
+        <motion.div
+          key={support.type}
+          className={`w-full sm:w-[350px] bg-gradient-to-br from-[#131c2c] to-[#232d3b] rounded-2xl shadow-2xl px-7 py-8 flex flex-col items-center border-2 border-blue-700/40 hover:scale-105 transition-transform duration-300 cursor-pointer`}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 * idx }}
+        >
+          <div className="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-800 to-cyan-700 shadow mb-4 text-4xl">
+            {support.icon}
+          </div>
+          <h3 className="text-xl font-bold text-blue-300 mb-2">{support.type}</h3>
+          <ul className="space-y-2 text-left w-full mt-4">
+            {support.highlights.map((item, i) => (
+              <li key={i} className="flex items-center text-blue-100 text-sm">
+                <svg className="w-4 h-4 text-cyan-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+      ))}
+    </div>
+    {/* Call to Action */}
+    <motion.div
+      className="mt-20 text-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.7, delay: 0.8 }}
     >
-      <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-24">
-        <div className="flex flex-col lg:flex-row gap-16 items-center">
-          {/* Left Content */}
-          <div className="lg:w-1/2">
-            <h2
-              ref={headingRef}
-              className="text-4xl md:text-5xl font-bold text-white mb-8 opacity-0"
-            >
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-                Project Support & Training
-              </span>
-            </h2>
-            <div ref={contentRef} className="space-y-6 text-gray-300 opacity-0">
-              <p className="text-lg">
-                Our comprehensive project support services ensure your technology initiatives
-                are delivered on time, within budget, and to the highest quality standards.
-              </p>
-              <p className="text-lg">
-                Complemented by our technical training programs, we equip your teams
-                with the skills needed to maintain and extend your solutions long after
-                implementation.
-              </p>
-             <Link href="/supports" passHref>
-  <button className="mt-6 px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/20">
-    Discuss Your Project
-  </button>
-</Link>
-            </div>
-          </div>
-          {/* Right Service Cards */}
-          <div className="lg:w-1/2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {supportServices.map((service, i) => (
-                <div
-                  key={service.title}
-                  className={`bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6 opacity-0 hover:bg-gray-700/30 transition-colors
-                    ${cardsVisible[i] ? 'animate-in-up opacity-100' : ''}`}
-                  style={{
-                    animationDelay: `${i * 0.1}s`
-                  }}
-                >
-                  <div className="text-3xl mb-4">{service.icon}</div>
-                  <h3 className="text-xl font-bold text-white mb-2">{service.title}</h3>
-                  <p className="text-gray-300">{service.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-export default ProjectSupportSection; 
+      <h4 className="text-xl md:text-2xl font-bold text-cyan-300 mb-6">Start your support journey today!</h4>
+      <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold rounded-lg hover:shadow-lg transition-all">
+        Get Project Support
+      </button>
+    </motion.div>
+    {/* Neon floating circles */}
+    <span className="pointer-events-none fixed z-0 left-4 top-40 w-24 h-24 bg-cyan-700 opacity-25 rounded-full blur-2xl animate-pulse" />
+    <span className="pointer-events-none fixed z-0 right-8 top-1/3 w-16 h-16 bg-blue-700 opacity-15 rounded-full blur-xl animate-pulse" />
+  </section>
+);
+
+export default ProjectSupportShowcase;

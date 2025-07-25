@@ -9,10 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@studio-freight/lenis": "^1.0.42",
     "firebase": "^11.6.1",
     "framer-motion": "^12.9.1",
     "gsap": "^3.13.0",
     "intl-tel-input": "^25.3.1",
+    "lucide-react": "^0.525.0",
     "maath": "^0.10.8",
     "next": "15.3.1",
     "nprogress": "^0.2.0",
