@@ -28,11 +28,11 @@ export default function Industries() {
 
   // Asset images for each industry (example only, adjust with actual asset paths)
   const industryAssets = {
-    finance: "/assets/herosection1.png",
-    healthcare: "/assets/herosection2.png",
+    finance: "/assets/Herosection1.png",
+    healthcare: "/assets/bg2.png",
     retail: "/assets/bg1.png",
-    pharma: "/assets/herosection3.png",
-    education: "/assets/herosection4.png",
+    pharma: "/assets/bg3.png",
+    education: "/assets/Herosection2.png",
     banking: "/assets/bg1.png",
     // Add more as needed
   };
