@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const tabs = [
   {
     title: "Global Recruitment",
-    heading: "Hiring talent across USA, Canada, and more.",
+    heading: "Hiring talent across USA, Canada, Luxembourg and more.",
     sub: "We connect you with the right people, wherever they are.",
     image: "/assets/bg1.png",
   },
@@ -139,12 +140,14 @@ export default function HeroSection() {
           {tabs[index].sub}
         </motion.p>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          className="bg-yellow-400 text-black px-6 py-3 rounded-full text-lg font-semibold flex items-center gap-2"
-        >
-           Contact Us →
-        </motion.button>
+       <Link href="/contactUs">
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    className="bg-yellow-400 text-black px-6 py-3 rounded-full text-lg font-semibold flex items-center gap-2"
+  >
+    Contact Us →
+  </motion.button>
+</Link>
       </div>
     </div>
   );

@@ -28,12 +28,12 @@ export default function Industries() {
 
   // Asset images for each industry (example only, adjust with actual asset paths)
   const industryAssets = {
-    finance: "/assets/Herosection1.png",
-    healthcare: "/assets/bg2.png",
-    retail: "/assets/bg1.png",
-    pharma: "/assets/bg3.png",
-    education: "/assets/Herosection2.png",
-    banking: "/assets/bg1.png",
+    finance: "/assets/Tailored Solutions_for_Financial_Services.jpg",
+    healthcare: "/assets/industrires/Healthcare.jpg",
+    retail: "/assets/industrires/Retail.jpg",
+    pharma: "/assets/industrires/Pharmaciticals.jpg",
+    education: "/assets/industrires/Education.jpg",
+    banking: "/assets/industrires/banking.jpg",
     // Add more as needed
   };
 
@@ -63,13 +63,17 @@ useEffect(() => {
       </Head>
 
       {/* Hero Section */}
-    <section
-  className="relative py-20 px-4 bg-cover bg-center bg-no-repeat"
+ <section
+  className="relative py-40 px-4 bg-no-repeat bg-cover bg-center"
   style={{
-    backgroundImage: `url('/assets/bg1.png')`,
+    backgroundImage: `url('/assets/industrires/expertise1.jpg')`,
+    backgroundPosition: 'center 20%', // shifts the image downward slightly
   }}
 >
+  {/* Overlay */}
   <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-950 opacity-90"></div>
+
+  {/* Content */}
   <div className="relative max-w-7xl mx-auto">
     <div className="text-center">
       <h1
@@ -87,11 +91,12 @@ useEffect(() => {
           headerInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
-      High Experienced Production-level IT solutions tailored to your industrys unique challenges
+        High Experienced Production-level IT solutions tailored to your industry's unique challenges
       </p>
     </div>
   </div>
 </section>
+
 
 
       {/* Industry Navigation Tabs */}

@@ -4,6 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import TechnologiesSection from '../components/TechnologiesSection'; // Assuming this is the correct path to your TechnologiesSection component
 // Icon SVGs for technologies
+import AI from '../../public/assets/Discovery/ai-data-analysis-team.jpg';
+import CloudArchitecture from '../../public/assets/Discovery/saas-concept-collage.jpg';
+import four from '../../public/assets/Discovery/cybersecurity-data-protection-concept.jpg';
+import six from '../../public/assets/Discovery/devops.jpg';
+import five from '../../public/assets/Discovery/representations-user-experience-interface-design.jpg';
+import DigitalTransformation from '../../public/assets/Discovery/close-up-hand-holding-smartphone.jpg';
+
 const TechnologyIcons: Record<string, JSX.Element> = {
   Blockchain: (
     <svg className="h-14 w-14 text-indigo-400" fill="none" viewBox="0 0 50 50">
@@ -119,59 +126,59 @@ const DiscoveryPage = () => {
       {
         title: "AI-Powered Analytics",
         description: "Transform raw data into actionable insights. Our analytics solutions empower your teams to make informed decisions faster, uncovering growth opportunities and driving measurable business impact.",
-        image: "/assets/bg1.png",
+        image: "/assets/Discovery/ai-data-analysis-team.jpg",
       },
       {
         title: "Cloud Architecture",
         description: "Architect and optimize your IT infrastructure for scale, agility, and resilience. We design cloud-native environments that accelerate innovation while ensuring robust security and compliance.",
-        image: "/assets/bg2.png",
+        image: "/assets/Discovery/saas-concept-collage.jpg",
       },
       {
         title: "Digital Transformation",
         description: "Reimagine how your business operates in the digital age. We partner with you to modernize legacy systems, streamline workflows, and create seamless customer experiences.",
-        image: "/assets/bg1.png",
+        image: "/assets/Discovery/close-up-hand-holding-smartphone.jpg",
       },
       {
         title: "Cybersecurity Solutions",
         description: "Protect your digital assets with comprehensive threat detection, response, and security architecture tailored to your business.",
-        image: "/assets/bg3.png",
+        image: "/assets/Discovery/cybersecurity-data-protection-concept.jpg",
       },
       {
         title: "Mobile & Web Development",
         description: "Deliver seamless, engaging digital experiences across platforms—fast, secure, and scalable for every device.",
-        image: "/assets/bg4.jpg",
+        image: "/assets/Discovery/representations-user-experience-interface-design.jpg",
       },
       {
         title: "DevOps Automation",
         description: "Accelerate delivery with CI/CD pipelines, automated testing, and state-of-the-art deployment strategies.",
-        image: "/assets/bg1.png",
+        image: "/assets/Discovery/devops.jpg",
       }
     ],
     industries: [
       {
         title: "Financial Services",
         description: "From automated compliance to real-time payments and personalized banking, we help financial institutions embrace the future of fintech safely and efficiently.",
-        image:"/assets/bg1.png",
+        image:"/assets/Discovery/Financial.jpg",
       },
       {
         title: "Healthcare",
         description: "Enhance patient outcomes and operational efficiency. Our digital health solutions power telemedicine, predictive analytics, and secure medical data management.",
-        image: "/assets/bg2.png",
+        image: "/assets/Discovery/Healthcare.jpg",
       },
       {
         title: "Pharma",
         description: "Modernize R&D, streamline clinical trials, and ensure regulatory compliance with our digital pharma solutions.",
-        image: "/assets/bg3.png",
+        image: "/assets/Discovery/Pharma.jpg",
       },
       {
         title: "Education",
         description: "Empower learning through digital classrooms, adaptive content, and scalable online platforms.",
-        image: "/assets/bg4.jpg",
+        image: "/assets/Discovery/Education.jpg",
       },
       {
         title: "Retail & E-Commerce",
         description: "Transform shopping experiences with omnichannel platforms, personalized recommendations, and robust back-end systems.",
-        image: "/assets/bg2.png",
+        image: "/assets/Discovery/Retail.jpg",
       }
     ],
     technologies: [
@@ -321,7 +328,7 @@ const DiscoveryPage = () => {
       </section>
 
       {/* Discovery Grid */}
-      <section className="relative py-20 px-4 z-10" ref={ref}>
+      <section className="relative  px-4 z-10" ref={ref}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"

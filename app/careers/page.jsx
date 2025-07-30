@@ -2,6 +2,7 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import ApplicationForm from '../components/careers/ApplicationForm'
 
 // Example hero background image (replace with your own)
 const HERO_BG = "/assets/bg1.png"; // Place a suitable image in public/assets/bg1.png
@@ -87,35 +88,36 @@ const jobOpenings = {
 const benefits = [
   {
     title: "Truly Remote",
-    description: "Work from anywhere, always. No office, no commute, just great work.",
-    icon: "/assets/bg2.png",
+    description: "Work from anywhere, always. No office, no commute, just great work. Enjoy freedom and autonomy every day.",
+    icon: "/assets/careers/remotework.jpg",
   },
   {
     title: "Flexible Hours",
-    description: "Set your schedule. We care about output, not hours.",
-    icon: "/assets/bg1.png",
+    description: "Set your schedule. We care about output, not hours. Balance work with life on your own terms.",
+    icon: "/assets/careers/flexibleHours.jpg",
   },
   {
     title: "Learning Budget",
-    description: "Yearly stipend for courses, books, and conferences.",
-    icon: "/assets/bg3.png",
+    description: "Yearly stipend for courses, books, and conferences. Grow your skills and stay ahead in your field.",
+    icon: "/assets/careers/budget.jpg",
   },
   {
     title: "Health Coverage",
-    description: "Comprehensive health, dental, and vision plans (country dependent).",
-    icon: "/assets/bg2.png",
+    description: "Comprehensive health, dental, and vision plans (country dependent). Peace of mind for you and your family.",
+    icon: "/assets/careers/Health.jpg",
   },
   {
     title: "Team Meetups",
-    description: "Optional annual offsite—connect, learn, and have fun in person.",
-    icon: "/assets/bg1.png",
+    description: "Optional annual offsite—connect, learn, and have fun in person. Build real connections beyond the screen.",
+    icon: "/assets/careers/team.jpg",
   },
   {
     title: "Modern Tech",
-    description: "Latest hardware and tools to do your best work.",
-    icon: "/assets/bg4.jpg",
+    description: "Latest hardware and tools to do your best work. We provide everything you need to excel.",
+    icon: "/assets/careers/modern.png",
   }
 ];
+
 
 const cultureBullets = [
   "Async-first, documentation-driven processes",
@@ -125,10 +127,10 @@ const cultureBullets = [
 ];
 
 const galleryImages = [
-  "/assets/bg1.png",
-  "/assets/bg2.png",
-"/assets/bg3.png",
- "/assets/bg4.jpg"
+  "/assets/careers/team.jpg",
+  "/assets/careers/doc.png",
+"/assets/careers/communication.png",
+ "/assets/careers/structure.png"
 ];
 
 export default function CareersPage() {
@@ -175,7 +177,7 @@ export default function CareersPage() {
       >
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <motion.h1
-            className="text-5xl md:text-7xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-indigo-400 leading-tight"
+            className="text-5xl md:text-7xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500 leading-tight"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.1 }}
@@ -219,7 +221,7 @@ export default function CareersPage() {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-3xl md:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-fuchsia-400">
+            <h2 className="text-3xl md:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
               Join our distributed team
             </h2>
             <p className="text-lg text-gray-400 max-w-2xl mx-auto">
@@ -241,7 +243,7 @@ export default function CareersPage() {
                 className={`px-6 py-2 font-semibold rounded-full border-2 transition-all duration-200 text-base shadow
                   ${
                     activeDepartment === dept.id
-                      ? "bg-gradient-to-tr from-cyan-500 to-fuchsia-500 border-transparent text-white scale-105"
+                      ? "bg-gradient-to-r from-cyan-400 to-blue-500 border-transparent text-white scale-105"
                       : "bg-black/70 border-gray-700 text-gray-300 hover:bg-gradient-to-r hover:from-cyan-900 hover:to-fuchsia-900 hover:text-white"
                   }`}
               >
@@ -278,7 +280,7 @@ export default function CareersPage() {
                   </h3>
                   <div className="flex items-center text-gray-400 mb-3 gap-4 font-medium text-xs">
                     <span className="flex items-center gap-1">
-                      <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-br from-cyan-400 to-fuchsia-400 mr-1"></span>
+                      <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 mr-1"></span>
                       {job.type}
                     </span>
                     <span className="flex items-center gap-1">
@@ -306,7 +308,7 @@ export default function CareersPage() {
                         transition={{ duration: 0.25 }}
                       >
                         <button
-                          className="w-full py-3 px-4 bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white rounded-xl font-semibold hover:from-fuchsia-500 hover:to-cyan-500 transition-all"
+                          className="w-full py-3 px-4 bg-gradient-to-r from-cyan-400 to-blue-500 text-white rounded-xl font-semibold hover:from-fuchsia-500 hover:to-cyan-500 transition-all"
                           onClick={() => handleApply(job.title)}
                         >
                           Apply Now
@@ -330,7 +332,7 @@ export default function CareersPage() {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-fuchsia-400">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
               Benefits
             </h2>
             <p className="text-lg text-gray-400 max-w-2xl mx-auto">
@@ -343,28 +345,34 @@ export default function CareersPage() {
             animate={inView ? { opacity: 1 } : {}}
             transition={{ duration: 0.5, delay: 0.15 }}
           >
-            {benefits.map((benefit, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 16 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: 0.1 + index * 0.06 }}
-                whileHover={{ y: -6, scale: 1.04 }}
-                className="bg-gradient-to-bl from-[#181c27] to-[#141923] rounded-2xl p-8 shadow-lg border border-cyan-800/20 flex flex-col items-center text-center group"
-              >
-                <div className="mb-5 h-14 w-14 flex items-center justify-center rounded-full bg-cyan-900/20 group-hover:scale-110 transition-transform duration-300">
-                  <img
-                    src={benefit.icon}
-                    alt={benefit.title}
-                    className="h-10 w-10 object-contain"
-                  />
-                </div>
-                <h3 className="text-lg font-bold mb-2 text-cyan-200">
-                  {benefit.title}
-                </h3>
-                <p className="text-gray-400 text-base">{benefit.description}</p>
-              </motion.div>
-            ))}
+          {benefits.map((benefit, index) => (
+  <motion.div
+    key={index}
+    initial={{ opacity: 0, y: 16 }}
+    animate={inView ? { opacity: 1, y: 0 } : {}}
+    transition={{ duration: 0.5, delay: 0.1 + index * 0.06 }}
+    whileHover={{ y: -6, scale: 1.04 }}
+    className="bg-gradient-to-bl from-[#181c27] to-[#141923] rounded-2xl p-8 shadow-lg border border-cyan-800/20 flex flex-col items-center text-center group"
+  >
+    {/* Circular Icon Container */}
+    <div className="mb-5 h-20 w-20 flex items-center justify-center rounded-full bg-cyan-900/20 overflow-hidden group-hover:scale-110 transition-transform duration-300">
+      <img
+        src={benefit.icon}
+        alt={benefit.title}
+        className="h-full w-full object-cover" // ensures full fit inside the circle
+      />
+    </div>
+
+    {/* Title */}
+    <h3 className="text-lg font-bold mb-2 text-cyan-200">
+      {benefit.title}
+    </h3>
+
+    {/* Description */}
+    <p className="text-gray-400 text-base">{benefit.description}</p>
+  </motion.div>
+))}
+
           </motion.div>
         </div>
       </section>
@@ -378,7 +386,7 @@ export default function CareersPage() {
               animate={inView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.5 }}
             >
-              <h2 className="text-3xl md:text-5xl font-bold mb-7 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-fuchsia-400">
+              <h2 className="text-3xl md:text-5xl font-bold mb-7 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
                 Our Culture
               </h2>
               <p className="text-lg text-gray-400 mb-7">
@@ -388,7 +396,7 @@ export default function CareersPage() {
                 {cultureBullets.map((item, index) => (
                   <li key={index} className="flex items-start">
                     <div className="flex-shrink-0 mt-1 mr-3">
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-400 to-fuchsia-400 flex items-center justify-center text-white">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center text-white">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-4 w-4"
@@ -437,118 +445,8 @@ export default function CareersPage() {
       </section>
 
       {/* Application Form */}
-      <section
-        className="py-20 px-4 bg-gradient-to-tr from-fuchsia-900/90 via-cyan-900/80 to-black/95"
-        ref={formRef}
-      >
-        <div className="max-w-2xl mx-auto">
-          <motion.h2
-            className="text-3xl md:text-5xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-fuchsia-400"
-            initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.5 }}
-          >
-            {isApplying && formData.role
-              ? `Apply for ${formData.role}`
-              : "Send us your application"}
-          </motion.h2>
-          <motion.form
-            className="grid grid-cols-1 md:grid-cols-2 gap-7"
-            initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            onSubmit={(e) => {
-              e.preventDefault();
-              // handle submit
-            }}
-          >
-            <div className="md:col-span-2">
-              <label
-                htmlFor="name"
-                className="block mb-2 font-semibold text-cyan-300"
-              >
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full px-5 py-3 rounded-lg bg-black/70 border border-cyan-800 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-500 font-medium"
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="email"
-                className="block mb-2 font-semibold text-cyan-300"
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full px-5 py-3 rounded-lg bg-black/70 border border-cyan-800 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-500 font-medium"
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="role"
-                className="block mb-2 font-semibold text-cyan-300"
-              >
-                Role
-              </label>
-              <input
-                type="text"
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleInputChange}
-                className="w-full px-5 py-3 rounded-lg bg-black/70 border border-cyan-800 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-500 font-medium"
-                required
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label
-                htmlFor="message"
-                className="block mb-2 font-semibold text-cyan-300"
-              >
-                Cover Letter / Message
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                value={formData.message}
-                onChange={handleInputChange}
-                rows="5"
-                className="w-full px-5 py-3 rounded-lg bg-black/70 border border-cyan-800 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-500 font-medium"
-                required
-              ></textarea>
-            </div>
-            <div className="md:col-span-2">
-              <label className="block mb-4">
-                <input type="file" className="hidden" />
-                <div className="px-5 py-3 rounded-lg bg-gradient-to-r from-cyan-800 to-fuchsia-800 border border-cyan-800 cursor-pointer hover:bg-cyan-900 transition-colors text-white text-center font-semibold">
-                  Upload Resume/CV
-                </div>
-              </label>
-            </div>
-            <div className="md:col-span-2">
-              <button
-                type="submit"
-                className="w-full px-8 py-4 bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-bold rounded-full hover:from-fuchsia-500 hover:to-cyan-500 hover:scale-105 shadow-lg transition-all duration-300 text-lg"
-              >
-                Submit Application
-              </button>
-            </div>
-          </motion.form>
-        </div>
-      </section>
+      <ApplicationForm/>
+     
     </div>
   );
 }
