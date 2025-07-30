@@ -2,14 +2,10 @@
 import { useState, useRef, useEffect, JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import TechnologiesSection from '../components/TechnologiesSection'; // Assuming this is the correct path to your TechnologiesSection component
-// Icon SVGs for technologies
-import AI from '../../public/assets/Discovery/ai-data-analysis-team.jpg';
-import CloudArchitecture from '../../public/assets/Discovery/saas-concept-collage.jpg';
-import four from '../../public/assets/Discovery/cybersecurity-data-protection-concept.jpg';
-import six from '../../public/assets/Discovery/devops.jpg';
-import five from '../../public/assets/Discovery/representations-user-experience-interface-design.jpg';
-import DigitalTransformation from '../../public/assets/Discovery/close-up-hand-holding-smartphone.jpg';
+import InnovationSpotlight from '../components/discovery/InnovationSpotlight'
+import TeamHilight from '../components/discovery/TeamHilight'
+import FAQSection from '../components/discovery/FAQSection'
+
 
 const TechnologyIcons: Record<string, JSX.Element> = {
   Blockchain: (
@@ -403,9 +399,14 @@ const DiscoveryPage = () => {
           </motion.div>
         </div>
       </section>
-      <TechnologiesSection/>
+      {/* <TechnologiesSection/> */}
+      <InnovationSpotlight/>
+      <TeamHilight/>
+      <FAQSection/>
 
-      {/* ...rest of About, Approach, Testimonials, FAQ, CTA, Footer, etc. */}
+      
+
+      
     </div>
   );
 };

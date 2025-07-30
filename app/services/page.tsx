@@ -1,6 +1,9 @@
 "use client";
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { useInView } from 'react-intersection-observer';
+import WhyPartner from '../components/services/WhyPartner';
+import FAQSection from '../components/services/FAQSection';
 
 const ProfessionalServices = () => {
   const [ref, inView] = useInView({
@@ -86,7 +89,85 @@ const ProfessionalServices = () => {
       ],
       bgColor: "bg-gray-800",
       accentColor: "from-indigo-600 to-blue-500"
-    }
+    },{
+  title: "DevOps & Automation",
+  description: "Streamline development cycles with robust CI/CD pipelines and automated workflows.",
+  icon: "⚙️",
+  features: [
+    "CI/CD pipelines",
+    "Infrastructure as Code",
+    "Monitoring & logging",
+    "Automation scripting"
+  ],
+  bgColor: "bg-gray-900",
+  accentColor: "from-teal-600 to-cyan-500"
+},
+{
+  title: "UI/UX Design",
+  description: "Craft intuitive and engaging digital experiences with user-centered design strategies.",
+  icon: "🎨",
+  features: [
+    "Wireframing & prototyping",
+    "User research",
+    "Responsive design",
+    "Design systems"
+  ],
+  bgColor: "bg-gray-800",
+  accentColor: "from-pink-500 to-fuchsia-500"
+},
+{
+  title: "Cybersecurity Solutions",
+  description: "Protect your digital assets with robust security assessments and compliance services.",
+  icon: "🔐",
+  features: [
+    "Vulnerability assessments",
+    "Penetration testing",
+    "Security monitoring",
+    "Compliance management"
+  ],
+  bgColor: "bg-gray-900",
+  accentColor: "from-red-600 to-yellow-500"
+},
+{
+  title: "Web & Mobile Development",
+  description: "Build high-performance web and mobile apps tailored to your business goals.",
+  icon: "💻",
+  features: [
+    "React/Angular/Vue development",
+    "iOS & Android apps",
+    "Backend APIs",
+    "Full-stack solutions"
+  ],
+  bgColor: "bg-gray-800",
+  accentColor: "from-blue-700 to-sky-500"
+},{
+  title: "Blockchain Development",
+  description: "Leverage decentralized technologies to build secure, transparent, and efficient systems.",
+  icon: "⛓️",
+  features: [
+    "Smart contract development",
+    "Decentralized applications (dApps)",
+    "Blockchain integration",
+    "Tokenization & NFTs"
+  ],
+  bgColor: "bg-gray-900",
+  accentColor: "from-violet-600 to-purple-500"
+},
+{
+  title: "Digital Marketing",
+  description: "Grow your brand and reach the right audience with data-driven marketing strategies.",
+  icon: "📣",
+  features: [
+    "SEO & SEM",
+    "Social media marketing",
+    "Email campaigns",
+    "Analytics & reporting"
+  ],
+  bgColor: "bg-gray-800",
+  accentColor: "from-yellow-500 to-orange-400"
+}
+
+
   ];
 
   return (
@@ -162,7 +243,7 @@ const ProfessionalServices = () => {
 
         {/* Process Section */}
          <motion.div 
-  className="bg-gray-900 rounded-2xl p-8 md:p-12 mb-20 relative overflow-hidden border border-gray-800"
+  className="bg-gray-900 rounded-2xl p-8 md:p-12 mb-5 relative overflow-hidden border border-gray-800"
   initial={{ opacity: 0, y: 50 }}
   animate={inView ? { opacity: 1, y: 0 } : {}}
   transition={{ duration: 0.6, delay: 0.4 }}
@@ -225,9 +306,13 @@ const ProfessionalServices = () => {
   </div>
       </motion.div>
 
+        <WhyPartner/>
+
+        <FAQSection/>
+
         {/* CTA Section */}
-       <motion.div 
-  className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-28 md:p-12 text-center relative overflow-hidden border border-gray-800 mb-20"
+    <motion.div 
+  className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-28 md:p-12 text-center relative overflow-hidden border border-gray-800 "
   initial={{ opacity: 0, y: 50 }}
   animate={inView ? { opacity: 1, y: 0 } : {}}
   transition={{ duration: 0.6, delay: 0.6 }}
@@ -237,12 +322,23 @@ const ProfessionalServices = () => {
     <h3 className="text-3xl font-bold mb-4 text-white">Ready to Transform Your Business?</h3>
     <p className="text-xl mb-8 max-w-2xl mx-auto text-gray-400">Our experts are standing by to discuss your unique requirements</p>
     <div className="flex flex-col sm:flex-row justify-center gap-4">
-      <button className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-lg hover:opacity-90 transition-all transform hover:-translate-y-1 shadow-lg shadow-cyan-500/20">
-        Request Consultation
-      </button>
-      <button className="px-8 py-4 border-2 border-gray-600 text-white font-bold rounded-lg hover:border-cyan-400 hover:text-cyan-400 transition-all transform hover:-translate-y-1">
-        Contact Our Team
-      </button>
+      
+      {/* Request Consultation */}
+      <Link href="/request-consultation">
+        <button className="cursor-pointer px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-lg hover:opacity-90 transition-all transform hover:-translate-y-1 shadow-lg shadow-cyan-500/20">
+          Request Consultation
+        </button>
+      </Link>
+
+    
+
+      {/* Contact Our Team */}
+      <Link href="/contactUs">
+        <button className="cursor-pointer px-8 py-4 border-2 border-gray-600 text-white font-bold rounded-lg hover:border-cyan-400 hover:text-cyan-400 transition-all transform hover:-translate-y-1">
+          Contact Our Team
+        </button>
+      </Link>
+      
     </div>
   </div>
 </motion.div>
