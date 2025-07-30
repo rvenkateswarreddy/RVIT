@@ -172,7 +172,7 @@ const ProfessionalServices = () => {
 
   return (
     <section className="py-0 px-0 bg-gray-950" ref={ref}>
-      {/* HERO SECTION WITH BACKGROUND IMAGE */}
+     
     <div className="relative min-h-[450px] flex items-center justify-center overflow-hidden">
   {/* Background image */}
   <div
