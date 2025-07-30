@@ -91,7 +91,7 @@ useEffect(() => {
           headerInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
-        High Experienced Production-level IT solutions tailored to your industry's unique challenges
+        High Experienced Production-level IT solutions tailored to your industrys unique challenges
       </p>
     </div>
   </div>

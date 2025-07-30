@@ -88,12 +88,12 @@ const ContactPage = () => {
             <span className="relative inline-block">
               <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full blur-xl opacity-30"></span>
               <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
-                Let's Connect
+                Lets Connect
               </span>
             </span>
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Ready to start your next project? Reach out and we'll respond within 24 hours.
+            Ready to start your next project? Reach out and we will respond within 24 hours.
           </p>
         </motion.div>
 
@@ -255,7 +255,7 @@ const ContactPage = () => {
                   animate={{ opacity: 1 }}
                   className="px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 font-medium text-sm"
                 >
-                  Your message has been sent successfully! We'll get back to you soon.
+                  Your message has been sent successfully! We will get back to you soon.
                 </motion.div>
               )}
 
