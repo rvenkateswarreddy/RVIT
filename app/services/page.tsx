@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useInView } from 'react-intersection-observer';
 import FAQSection from '../components/services/FAQSection';
-import WhyPartner from "../components/services/WhyPartner"
+import WhySection from "../components/services/WhySection"
 const ProfessionalServices = () => {
   const [ref, inView] = useInView({
     threshold: 0.1,
@@ -305,7 +305,7 @@ const ProfessionalServices = () => {
   </div>
       </motion.div>
 
-   <WhyPartner/>
+   <WhySection/>
 
         <FAQSection/>
 
