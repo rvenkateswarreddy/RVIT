@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiMail, FiSend, FiPhone, FiMapPin } from 'react-icons/fi';
 import Image from 'next/image';
-import contact from '../../public/assets/Tailored Solutions_for_Financial_Services.jpg';
+
 import { db } from '../../FirebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -108,7 +108,7 @@ const ContactPage = () => {
               className="relative h-96 w-full rounded-xl overflow-hidden shadow-2xl group"
             >
               <Image
-                src={contact}
+                src="/assets/Tailored Solutions_for_Financial_Services.jpg"
                 alt="Contact RV IT Services"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
