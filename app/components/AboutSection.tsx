@@ -13,20 +13,20 @@ const services: Service[] = [
   {
     title: "Global Recruitment & Staffing",
     desc: "Hire skilled professionals across USA, Canada, Luxembourg, and more. Fast onboarding with flexible hiring.",
-    img: "D:\AllREACTPROJECTS\Errtek_Portfolio\public\assets\Home\global.jpg",
+    img: "/assets/Home/global.jpg",
     tag: "Talent"
   },
   {
     title: "Executive Hiring",
     desc: "Leadership and C-level hiring services with a global headhunting network.",
-    img: "/assets/home/ExecutiveHiring.jpg",
+    img: "/assets/Home/ExecutiveHiring.jpg",
     tag: "Talent"
     
   },
   {
     title: "Contract Staffing",
     desc: "Quickly scale your team with vetted contract workers — short-term or long-term.",
-    img: "/assets/home/ContractStaffing.jpg",
+    img: "/assets/Home/ContractStaffing.jpg",
     tag: "Talent"
   },
 
@@ -34,19 +34,19 @@ const services: Service[] = [
   {
     title: "Corporate Skill Training",
     desc: "Customized training for teams — from onboarding to upskilling, designed for company goals.",
-    img: "/assets/home/ExecutiveHiring.jpg",
+    img: "/assets/Home/ExecutiveHiring.jpg",
     tag: "Training"
   },
   {
     title: "Tech Bootcamps for Teams",
     desc: "Hands-on workshops for software tools, frameworks, and cloud platforms.",
-    img: "/assets/home/bootcamp.jpg",
+    img: "/assets/Home/bootcamp.jpg",
     tag: "Training"
   },
   {
     title: "Leadership & Communication",
     desc: "Workshops that boost leadership, communication, and agile thinking for managers and teams.",
-    img: "/assets/home/leadership1.jpg",
+    img: "/assets/Home/leadership1.jpg",
     tag: "Training"
   },
 
@@ -54,19 +54,19 @@ const services: Service[] = [
   {
     title: "Project-Based Support",
     desc: "On-demand experts for your projects — part-time, full-time, or contract-based support.",
-    img: "/assets/home/project.jpg",
+    img: "/assets/Home/project.jpg",
     tag: "Support"
   },
   {
     title: "IT Helpdesk & Tech Support",
     desc: "24/7 technical support including L1 and L2 resolution for smooth business operations.",
-    img: "/assets/home/Helpdesk.jpg",
+    img: "/assets/Home/Helpdesk.jpg",
     tag: "Support"
   },
   {
     title: "Fully Managed IT Services",
     desc: "Full-cycle IT support with SLAs — includes infrastructure, monitoring, and user support.",
-    img: "/assets/home/ITServices.jpg",
+    img: "/assets/Home/ITServices.jpg",
     tag: "Support"
   },
 
@@ -74,19 +74,19 @@ const services: Service[] = [
   {
     title: "Business Automation & AI",
     desc: "Automate tasks, workflows, and reporting with powerful AI-driven tools.",
-    img: "/assets/home/businnesAuto.jpg",
+    img: "/assets/Home/businnesAuto.jpg",
     tag: "AI"
   },
   {
     title: "AI Chatbots & Assistants",
     desc: "Deploy chatbots for websites, apps, and internal workflows. Powered by large language models.",
-    img: "/assets/home/chatbot.jpg",
+    img: "/assets/Home/chatbot.jpg",
     tag: "AI"
   },
   {
     title: "Predictive Data Insights",
     desc: "Turn raw data into actionable insights using AI and machine learning.",
-    img: "/assets/home/reprasentation.jpg",
+    img: "/assets/Home/reprasentation.jpg",
     tag: "AI"
   },
 
@@ -94,37 +94,37 @@ const services: Service[] = [
   {
     title: "Web & Mobile App Development",
     desc: "End-to-end development for modern apps and responsive websites.",
-    img: "/assets/home/web.jpg",
+    img: "/assets/Home/web.jpg",
     tag: "Development"
   },
   {
     title: "Cloud Services (AWS, Azure, GCP)",
     desc: "Migrate, manage, and scale apps in the cloud using major platforms.",
-    img: "/assets/home/CloudServices.jpg",
+    img: "/assets/Home/CloudServices.jpg",
     tag: "Development"
   },
   {
     title: "DevOps & Automation",
     desc: "Set up CI/CD pipelines, manage infrastructure as code, and speed up releases.",
-    img: "/assets/home/devops.jpg",
+    img: "/assets/Home/devops.jpg",
     tag: "Development"
   },
   {
     title: "E-commerce Solutions",
     desc: "We build online stores with Shopify, Magento, WooCommerce and custom platforms.",
-    img: "/assets/home/E-commerce.jpg",
+    img: "/assets/Home/E-commerce.jpg",
     tag: "Development"
   },
   {
     title: "API & Backend Development",
     desc: "Build secure APIs and backend systems using Node.js, Python, Java, and GraphQL.",
-    img: "/assets/home/API.jpg",
+    img: "/assets/Home/API.jpg",
     tag: "Development"
   },
   {
     title: "UI/UX & Front-End Engineering",
     desc: "Beautiful, fast front-ends built with React, Angular, and Vue.",
-    img: "/assets/home/uiux.jpg",
+    img: "/assets/Home/uiux.jpg",
     tag: "Development"
   }
 ];
