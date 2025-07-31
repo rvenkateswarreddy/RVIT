@@ -13,7 +13,7 @@ const services: Service[] = [
   {
     title: "Global Recruitment & Staffing",
     desc: "Hire skilled professionals across USA, Canada, Luxembourg, and more. Fast onboarding with flexible hiring.",
-    img: "/assets/Home/global.jpg",
+    img: "/assets/global.jpg",
     tag: "Talent"
   },
   {
