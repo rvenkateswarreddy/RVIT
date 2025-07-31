@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiMail, FiSend, FiPhone, FiMapPin } from 'react-icons/fi';
 import Image from 'next/image';
-import contact from '../../public/assets/herosection3.png';
+import contact from '../../public/assets/herosection1.png';
 import { db } from '../../FirebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
